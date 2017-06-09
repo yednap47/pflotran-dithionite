@@ -658,14 +658,18 @@ subroutine SubsurfaceReadFlowPM(input, option, pm)
         call InputErrorMsg(input,option,'mode',error_string)
         call StringToUpper(word)
         select case(word)
+          case('GENERAL','TOIL_IMS','TOWG_IMMISCIBLE','TODD_LONGOSTAFF', &
+               'TOWG_MISCIBLE','BLACK_OIL','SOLVENT_TL')
+          ! In OptionFlowInitRealization(), numerical_derivatives is set to
+          ! PETSC_FALSE, but the default for GENERAL needs to be PETSC_TRUE.
+          ! This is will eventually affect all flow modes with numerical
+          ! derivatives as default if analytical derivatives are available
+          ! and we are keying off this flag. 
+          option%flow%numerical_derivatives = PETSC_TRUE
+        end select
+        select case(word)
           case('GENERAL')
             pm => PMGeneralCreate()
-            ! In OptionFlowInitRealization(), numerical_derivatives is set to
-            ! PETSC_FALSE, but the default for GENERAL needs to be PETSC_TRUE.
-            ! This is will eventually affect all flow modes with numerical
-            ! derivatives as default if analytical derivatives are available
-            ! and we are keying off this flag. 
-            option%flow%numerical_derivatives = PETSC_TRUE
           case('MPHASE')
             pm => PMMphaseCreate()
           case('FLASH2')
@@ -1606,6 +1610,7 @@ subroutine SubsurfaceReadInput(simulation)
   use Material_module
   use Saturation_Function_module  
   use Characteristic_Curves_module
+  use Creep_Closure_module
   use Dataset_Base_class
   use Dataset_module
   use Dataset_Common_HDF5_class
@@ -1697,6 +1702,7 @@ subroutine SubsurfaceReadInput(simulation)
   type(fluid_property_type), pointer :: fluid_property
   type(saturation_function_type), pointer :: saturation_function
   class(characteristic_curves_type), pointer :: characteristic_curves
+  class(creep_closure_type), pointer :: creep_closure
 
   class(realization_subsurface_type), pointer :: realization
   type(grid_type), pointer :: grid
@@ -2268,6 +2274,21 @@ subroutine SubsurfaceReadInput(simulation)
         call CharacteristicCurvesAddToList(characteristic_curves, &
                                           realization%characteristic_curves)
         nullify(characteristic_curves)   
+
+!....................
+      case('CREEP_CLOSURE_TABLE')
+        wipp => WIPPGetPtr()
+        option%flow%transient_porosity = PETSC_TRUE
+        option%flow%creep_closure_on = PETSC_TRUE
+        creep_closure => CreepClosureCreate()
+        call InputReadWord(input,option,creep_closure%name,PETSC_TRUE)
+        call InputErrorMsg(input,option,'name','CREEP_CLOSURE_TABLE')
+        option%io_buffer = '  Name :: ' // trim(creep_closure%name)
+        call printMsg(option)
+        call creep_closure%Read(input,option)
+        call CreepClosureAddToList(creep_closure, &
+             wipp%creep_closure_tables)
+        nullify(creep_closure)
 
 !....................
       
