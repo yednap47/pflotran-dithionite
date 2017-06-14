@@ -1,0 +1,273 @@
+# Id: pflotran-reaction-simple.in, Wed 02 Nov 2016 09:41:54 AM MDT pandeys #
+# Created by Sachin Pandey, LANL
+# Description: Test simple reactions on 2D grid
+#------------------------------------------------------------------------------
+#=========================== flow mode ========================================
+SIMULATION
+  SIMULATION_TYPE SUBSURFACE
+  PROCESS_MODELS
+    SUBSURFACE_FLOW flow
+      MODE RICHARDS
+    /
+    SUBSURFACE_TRANSPORT transport
+      GLOBAL_IMPLICIT
+      NUMERICAL_JACOBIAN
+    /
+  /
+END
+
+SUBSURFACE
+
+#=========================== chemistry ========================================
+CHEMISTRY
+  PRIMARY_SPECIES
+    A(aq)
+    H+
+    O2(aq)
+    CrO4--
+    Cr+++
+    Fe+++
+    HCO3-
+  /
+  SECONDARY_SPECIES
+    OH-
+    CO3--
+    CO2(aq)
+  /
+  IMMOBILE_SPECIES
+    slow_Fe++
+    fast_Fe++
+  /
+  REACTION_SANDBOX
+    FE2_O2
+      RATE_CONSTANT_SLOW 1.d-2 # /s
+      RATE_CONSTANT_FAST 1.d0 # /s
+      ROCK_DENSITY 1500.d0 # m^3/m^3_bulk
+      EPS 1.d-100
+    /
+    FE2_CR6
+      RATE_CONSTANT_SLOW 1.d-2 # /s
+      RATE_CONSTANT_FAST 1.d0  # /s
+      ROCK_DENSITY 1500.d0 # m^3/m^3_bulk
+      EPS 1.d-100
+    /
+  /
+  MINERALS
+    Fe(OH)3(s)
+    Cr(OH)3(s)
+  /
+  MINERAL_KINETICS
+    Fe(OH)3(s)
+      RATE_CONSTANT 1.d-5 mol/m^2-sec
+    /
+    Cr(OH)3(s)
+      RATE_CONSTANT 1.d-5 mol/m^2-sec
+    /
+  /
+  DATABASE ../chromium_dithionite_2017.dat
+  ACTIVITY_COEFFICIENTS TIMESTEP
+  LOG_FORMULATION
+  OUTPUT
+    ALL
+    FREE_ION
+    TOTAL
+    SECONDARY_SPECIES
+    PH
+  /
+END
+
+#=========================== solver options ===================================
+#LINEAR_SOLVER TRANSPORT
+#  SOLVER DIRECT
+#END
+
+#=========================== discretization ===================================
+GRID
+  TYPE structured
+  NXYZ 1000 1 1
+  BOUNDS
+    0.d0 0.d0 0.d0
+    100.0 1.d0 5.d0
+  /
+END
+
+#=========================== fluid properties =================================
+FLUID_PROPERTY
+  DIFFUSION_COEFFICIENT 1.d-9
+END
+
+#=========================== material properties ==============================
+MATERIAL_PROPERTY soil1
+  ID 1
+  POROSITY 0.15d0
+  TORTUOSITY 0.1d0
+  SATURATION_FUNCTION cc1
+  PERMEABILITY
+     PERM_ISO 2.369440097276682e-11
+  /
+#  LONGITUDINAL_DISPERSIVITY 5.d0
+END
+
+#=========================== characteristic curves ============================
+CHARACTERISTIC_CURVES cc1
+  SATURATION_FUNCTION VAN_GENUCHTEN
+    ALPHA  1.d-4
+    M 0.5d0
+    LIQUID_RESIDUAL_SATURATION 0.1d0
+  /
+  PERMEABILITY_FUNCTION MUALEM_VG_LIQ
+    M 0.5d0
+    LIQUID_RESIDUAL_SATURATION 0.1d0
+  /
+END
+
+#=========================== output options ===================================
+OUTPUT
+  FORMAT HDF5
+  VELOCITY_AT_CENTER
+  VARIABLES
+    LIQUID_SATURATION
+    LIQUID_PRESSURE
+    LIQUID_HEAD 
+    PERMEABILITY
+  END
+  PERIODIC TIME 10.d-2 y
+  PERIODIC_OBSERVATION TIME 10.d-2 y
+  PRINT_COLUMN_IDS
+END
+
+#=========================== times ============================================
+TIME
+  FINAL_TIME 10.d0 y
+  INITIAL_TIMESTEP_SIZE 100.d-10 y 
+  MAXIMUM_TIMESTEP_SIZE 10.d-2 y
+END
+
+#=========================== regions ==========================================
+REGION all
+  COORDINATES
+    0.d0 0.d0 0.d0
+    100.0 1.d0 5.d0
+  /
+END
+
+REGION west
+  FACE west
+  COORDINATES
+    0.d0 0.d0 0.d0
+    0.d0 1.d0 5.d0
+  /
+END
+
+REGION east
+  FACE east
+  COORDINATES
+    100.0 0.d0 0.d0
+    100.0 1.d0 5.d0
+  /
+END
+
+#================== observation points ========================
+#OBSERVATION CrPz-2
+#  REGION CrPz-2
+#/
+
+#=========================== flow conditions ==================================
+FLOW_CONDITION initial
+  TYPE
+    PRESSURE hydrostatic
+  /
+  DATUM 0.d0 0.d0 100.d0
+  PRESSURE 9.778799e+06
+END
+
+FLOW_CONDITION east
+  TYPE
+    PRESSURE hydrostatic
+  /
+  DATUM 0.d0 0.d0 99.d0
+  PRESSURE 9.757188e+06
+END
+
+#=========================== transport conditions =============================
+TRANSPORT_CONDITION initial
+  TYPE dirichlet
+  CONSTRAINT_LIST
+    0.d0 initial
+  /
+END
+
+TRANSPORT_CONDITION inlet
+  TYPE dirichlet
+  CONSTRAINT_LIST
+    0.d0 d inlet
+  /
+END
+
+TRANSPORT_CONDITION outlet
+  TYPE dirichlet_zero_gradient
+  CONSTRAINT_LIST
+    0.d0 inlet
+  /
+END
+
+#=========================== constraints ======================================^M
+CONSTRAINT initial
+  CONCENTRATIONS
+    A(aq)   1.d-20 T
+    H+      9.d0 P
+    O2(aq)  2.84d-4 T
+    CrO4--  1.92d-5 T # 1000 ppb
+    Cr+++   1.d-20 T
+    Fe+++   1.d-20 T
+    HCO3-   5.d-1 T
+  /
+  MINERALS
+    Fe(OH)3(s) 1.d-20 1.d0
+    Cr(OH)3(s) 1.d-20 1.d0
+  /
+  IMMOBILE
+    slow_Fe++ 100.0d0 # mol/m^3_bulk
+    fast_Fe++ 100.0d0 # mol/m^3_bulk
+  /
+END
+
+CONSTRAINT inlet
+  CONCENTRATIONS
+    A(aq)   1.d-20 T
+    H+      9.d0 P
+    O2(aq)  2.84d-4 T
+    CrO4--  1.92d-5 T # 1000 ppb
+    Cr+++   1.d-20 T
+    Fe+++   1.d-20 T
+    HCO3-   5.d-1 T
+  /
+END
+
+#=========================== condition couplers ===============================
+# initial condition
+INITIAL_CONDITION
+  TRANSPORT_CONDITION initial
+  FLOW_CONDITION initial
+  REGION all
+END
+
+BOUNDARY_CONDITION west
+  TRANSPORT_CONDITION inlet
+  FLOW_CONDITION initial 
+  REGION west 
+END
+
+BOUNDARY_CONDITION east  
+  TRANSPORT_CONDITION outlet
+  FLOW_CONDITION east 
+  REGION east
+END
+
+#=========================== stratigraphy couplers ============================
+STRATA
+  REGION all 
+  MATERIAL soil1
+END
+
+END_SUBSURFACE

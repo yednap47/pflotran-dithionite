@@ -1,0 +1,239 @@
+# Id: calcite.in, Mon 17 Apr 2017 06:19:10 PM MDT pandeys #
+# Created by Sachin Pandey, LANL
+# Description: Equilibrate synthetic groundwater with calcite.
+#   - start with pH 7, see where it goes from there
+#   - include secondary species
+#------------------------------------------------------------------
+SIMULATION
+  SIMULATION_TYPE SUBSURFACE
+  PROCESS_MODELS
+    SUBSURFACE_FLOW flow
+      MODE RICHARDS
+    /
+    SUBSURFACE_TRANSPORT transport
+      GLOBAL_IMPLICIT
+    /
+  /
+END
+
+SUBSURFACE
+
+#=========================== chemistry ========================================
+CHEMISTRY
+  PRIMARY_SPECIES
+    A(aq)
+    H+
+    O2(aq)
+    CrO4--
+    S2O4--
+    S2O3--
+    SO3--
+    SO4--
+    Fe+++
+    Cr+++
+    HCO3-
+    Ca++
+    K+
+# Synthetic groundwater
+    Br-
+    Cl-
+    Mg++
+    Na+
+    SiO2(aq)
+  /
+  SECONDARY_SPECIES
+    OH-
+    CO3--
+    CO2(aq)
+    CaCO3(aq)
+    CaCl+
+    CaCl2(aq)
+    CaHCO3+
+    CaOH+
+    CaSO4(aq)
+    Cr2O7--
+    H2CrO4(aq)
+    H2SO4(aq)
+    H2SiO4--
+    H4(H2SiO4)4----
+    H6(H2SiO4)4--
+    HCl(aq)
+    HCrO4-
+    HSO4-
+    HSiO3-
+    H3SiO4-
+    KBr(aq)
+    KCl(aq)
+    KHSO4(aq)
+    KOH(aq)
+    KSO4-
+    Mg4(OH)4++++
+    MgCO3(aq)
+    MgCl+
+    MgHCO3+
+    MgSO4(aq)
+    NaBr(aq)
+    NaCO3-
+    NaCl(aq)
+    NaHCO3(aq)
+    NaHSiO3(aq)
+    NaOH(aq)
+    NaSO4-
+    MgOH+
+  /
+  DATABASE ../../chromium_dithionite_2017.dat
+  ACTIVITY_COEFFICIENTS TIMESTEP
+  LOG_FORMULATION
+  OUTPUT
+    ALL
+#    FREE_ION
+    TOTAL
+#    SECONDARY_SPECIES
+    PH
+  /
+END
+
+#=========================== solver options ===================================
+skip
+TIMESTEPPER
+  MAX_TS_CUTS 15
+  MAX_STEPS 10000
+END
+noskip
+
+LINEAR_SOLVER FLOW
+  SOLVER DIRECT
+  RTOL 1.d-8
+END
+
+LINEAR_SOLVER TRANSPORT
+  SOLVER DIRECT
+  RTOL 1.d-8
+END
+
+#=========================== discretization ===================================
+GRID
+  TYPE structured
+  ORIGIN 0.d0 0.d0 0.d0
+  NXYZ 1 1 1
+  BOUNDS
+    0.d0 0.d0 0.d0
+    1.d0 1.d0 1.d0
+  /
+END
+
+#=========================== fluid properties =================================
+FLUID_PROPERTY
+  DIFFUSION_COEFFICIENT 1.d-9
+END
+
+#=========================== material properties ==============================
+MATERIAL_PROPERTY saprolite
+  ID 1
+  POROSITY 3.28d-1
+  TORTUOSITY 1.d0
+  PERMEABILITY
+    PERM_ISO 1.d-12
+  /
+  CHARACTERISTIC_CURVES sf_saprolite
+END
+
+#=========================== saturation functions =============================
+! note: no need to specify phase as Richards is soley water phase
+CHARACTERISTIC_CURVES sf_saprolite
+  SATURATION_FUNCTION VAN_GENUCHTEN
+    M 8.5714d-01
+    ALPHA 7.6825e-05
+    LIQUID_RESIDUAL_SATURATION 1.5d-1
+  /
+  PERMEABILITY_FUNCTION MUALEM_VG_LIQ
+    M 8.5714d-01
+    LIQUID_RESIDUAL_SATURATION 1.5d-1
+  /
+END
+
+#=========================== output options ===================================
+OUTPUT
+  PERIODIC TIME 10.d0 d
+  PERIODIC_OBSERVATION TIME 1.d0 d
+  PRINT_COLUMN_IDS
+END
+
+#=========================== times ============================================
+TIME
+  FINAL_TIME 100.d0 d
+  INITIAL_TIMESTEP_SIZE 1.d-10 d
+  MAXIMUM_TIMESTEP_SIZE 1.d0 d
+END
+
+#=========================== regions ==========================================
+REGION all
+  COORDINATES
+    0.d0 0.d0 0.d0
+    1.d0 1.d0 1.d0
+  /
+END
+
+REGION obs
+  BLOCK 1 1 1 1 1 1
+END
+
+OBSERVATION obs
+  REGION obs
+END
+
+#=========================== flow conditions ==================================
+FLOW_CONDITION initial_pressure
+  TYPE
+    PRESSURE dirichlet  ! type is dirichlet for pressure
+  /                                       !   (constant pressure [Pa])
+    PRESSURE 1.0132e+05   ! saturated
+END
+
+#=========================== transport conditions =============================
+TRANSPORT_CONDITION initial
+  TYPE dirichlet
+  CONSTRAINT_LIST
+    0.d0 injectant
+  /
+END
+
+#=========================== constraints ======================================
+CONSTRAINT injectant
+  CONCENTRATIONS
+    A(aq)   1.d-1 T
+    H+     -0.4 T
+    O2(aq)  2.84d-4 T
+    CrO4--  1.d-20 T
+    S2O4--  1.d-1  T
+    S2O3--  1.d-20 T
+    SO3--   1.d-20 T
+    SO4--   1.d-20 T
+    Fe+++   1.d-20 T
+    Cr+++   1.d-20 T
+    HCO3-   0.4 T
+    Ca++    1.d-20 T
+    K+      0.4 T
+# Required for synthetic groundwater only
+    Br-      1.0d-20 T
+    Cl-      1.0d-20 T
+    Mg++     1.0d-20 T
+    Na+      1.0d-20 T
+    SiO2(aq) 1.0d-20 T
+  /
+END
+
+#=========================== condition couplers ===============================
+INITIAL_CONDITION
+  FLOW_CONDITION initial_pressure
+  TRANSPORT_CONDITION initial
+  REGION all
+END
+
+#=========================== condition couplers ===============================
+STRATA
+  REGION all
+  MATERIAL saprolite
+END
+
+END_SUBSURFACE

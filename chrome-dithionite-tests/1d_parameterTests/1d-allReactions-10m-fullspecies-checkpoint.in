@@ -1,0 +1,412 @@
+# Id: pflotran-reaction-simple.in, Wed 02 Nov 2016 09:41:54 AM MDT pandeys #
+# Created by Sachin Pandey, LANL
+# Description: Test simple reactions on 2D grid
+#------------------------------------------------------------------------------
+
+SIMULATION
+  SIMULATION_TYPE SUBSURFACE
+  PROCESS_MODELS
+    SUBSURFACE_FLOW flow
+      MODE RICHARDS
+    /
+    SUBSURFACE_TRANSPORT transport
+      GLOBAL_IMPLICIT
+      NUMERICAL_JACOBIAN
+    /
+  /
+  CHECKPOINT
+    PERIODIC TIMESTEP 1000
+  /
+END
+
+SUBSURFACE
+
+#=========================== chemistry ========================================
+CHEMISTRY
+  PRIMARY_SPECIES
+    A(aq)
+    H+
+    O2(aq)
+    CrO4--
+    S2O4--
+    S2O3--
+    SO3--
+    SO4--
+    Fe+++
+    Cr+++
+    HCO3-
+    Ca++
+    K+
+# Synthetic groundwater
+    Br-
+    Cl-
+    Mg++
+    Na+
+    SiO2(aq)
+  /
+  SECONDARY_SPECIES
+    OH-
+    CO3--
+    CO2(aq)
+    CaCO3(aq)
+    CaCl+
+    CaCl2(aq)
+    CaHCO3+
+    CaOH+
+    CaSO4(aq)
+    Cr2O7--
+    H2CrO4(aq)
+    H2SO4(aq)
+    H2SiO4--
+    H4(H2SiO4)4----
+    H6(H2SiO4)4--
+    HCl(aq)
+    HCrO4-
+    HSO4-
+    HSiO3-
+    H3SiO4-
+    KBr(aq)
+    KCl(aq)
+    KHSO4(aq)
+    KOH(aq)
+    KSO4-
+    Mg4(OH)4++++
+    MgCO3(aq)
+    MgCl+
+    MgHCO3+
+    MgSO4(aq)
+    NaBr(aq)
+    NaCO3-
+    NaCl(aq)
+    NaHCO3(aq)
+    NaHSiO3(aq)
+    NaOH(aq)
+    NaSO4-
+    MgOH+
+  /
+  IMMOBILE_SPECIES
+    slow_Fe++
+    fast_Fe++
+  /
+skip
+  REACTION_SANDBOX
+    S2O4_DISP
+      RATE_CONSTANT 3.61d-5 # /s, Istok (1999), 0.13 /hr
+      EPS 1.d-50
+    /
+    S2O4_O2
+      RATE_CONSTANT 1.d0 # /s
+      EPS 1.d-50
+    /
+    S2O4_FE3
+      RATE_CONSTANT 1.0d-5 # /s
+      SSA 175 # m^2/g
+      ROCK_DENSITY 1200.d0 # m^3/m^3_bulk
+      FRACTION 0.6
+      EPS 1.d-50
+    /
+    FE2_O2
+      RATE_CONSTANT_SLOW 1.d-1 # /s
+      RATE_CONSTANT_FAST 1.d1 # /s
+      ROCK_DENSITY 1200.d0 # kg/m^3_bulk
+      EPS 1.d-50
+    /
+    FE2_CR6
+      RATE_CONSTANT_SLOW 1.d-1 # /s
+      RATE_CONSTANT_FAST 1.d1  # /s
+      ROCK_DENSITY 1200.d0 # kg/m^3_bulk
+      EPS 1.d-50
+    /
+  /
+noskip
+  MINERALS
+    Fe(OH)3(s)
+    Cr(OH)3(s)
+    Calcite
+  /
+  MINERAL_KINETICS
+    Fe(OH)3(s)
+      RATE_CONSTANT 1.d-5 mol/m^2-sec
+    /
+    Cr(OH)3(s)
+      RATE_CONSTANT 1.d-5 mol/m^2-sec
+    /
+    Calcite
+      RATE_CONSTANT 1.d-5 mol/m^2-sec
+    /
+  /
+  DATABASE ../chromium_dithionite_2017.dat
+  ACTIVITY_COEFFICIENTS TIMESTEP
+  LOG_FORMULATION
+  OUTPUT
+    ALL
+    TOTAL
+    PH
+#    FREE_ION
+#    SECONDARY_SPECIES
+  /
+END
+
+#=========================== solver options ===================================
+NEWTON_SOLVER TRANSPORT
+#  RTOL 1.d-12
+END
+
+#=========================== discretization ===================================
+GRID
+  TYPE structured
+  NXYZ 260 1 1
+  DXYZ
+    0.01 0.01 0.01 0.01 0.01 0.01 0.01 0.01 0.01 0.01 \ 
+    0.01 0.01 0.01 0.01 0.01 0.01 0.01 0.01 0.01 0.01 \ 
+    0.01 0.01 0.01 0.01 0.01 0.01 0.01 0.01 0.01 0.01 \ 
+    0.01 0.01 0.01 0.01 0.01 0.01 0.01 0.01 0.01 0.01 \ 
+    0.01 0.01 0.01 0.01 0.01 0.01 0.01 0.01 0.01 0.01 \ 
+    0.01 0.01 0.01 0.01 0.01 0.01 0.01 0.01 0.01 0.01 \ 
+    0.01 0.01 0.01 0.01 0.01 0.01 0.01 0.01 0.01 0.01 \ 
+    0.01 0.01 0.01 0.01 0.01 0.01 0.01 0.01 0.01 0.01 \ 
+    0.01 0.01 0.01 0.01 0.01 0.01 0.01 0.01 0.01 0.01 \ 
+    0.01 0.01 0.01 0.01 0.01 0.01 0.01 0.01 0.01 0.01 \ 
+    0.01 0.01 0.01 0.01 0.01 0.01 0.01 0.01 0.01 0.01 \ 
+    0.01 0.01 0.01 0.01 0.01 0.01 0.01 0.01 0.01 0.01 \ 
+    0.01 0.01 0.01 0.01 0.01 0.01 0.01 0.01 0.01 0.01 \ 
+    0.01 0.01 0.01 0.01 0.01 0.01 0.01 0.01 0.01 0.01 \ 
+    0.01 0.01 0.01 0.01 0.01 0.01 0.01 0.01 0.01 0.01 \ 
+    0.01 0.01 0.01 0.01 0.01 0.01 0.01 0.01 0.01 0.01 \ 
+    0.01 0.01 0.01 0.01 0.01 0.01 0.01 0.01 0.01 0.01 \ 
+    0.01 0.01 0.01 0.01 0.01 0.01 0.01 0.01 0.01 0.01 \ 
+    0.01 0.01 0.01 0.01 0.01 0.01 0.01 0.01 0.01 0.01 \ 
+    0.01 0.01 0.01 0.01 0.01 0.01 0.01 0.01 0.01 0.01 \ 
+    0.1 0.1 0.1 0.1 0.1 0.1 0.1 0.1 0.1 0.1 \ 
+    0.1 0.1 0.1 0.1 0.1 0.1 0.1 0.1 0.1 0.1 \ 
+    0.1 0.1 0.1 0.1 0.1 0.1 0.1 0.1 0.1 0.1 \ 
+    0.1 0.1 0.1 0.1 0.1 0.1 0.1 0.1 0.1 0.1 \ 
+    0.2 0.2 0.2 0.2 0.2 0.2 0.2 0.2 0.2 0.2 \ 
+    0.2 0.2 0.2 0.2 0.2 0.2 0.2 0.2 0.2 0.2 
+    0.1 
+    0.1 
+  /
+END
+
+#=========================== fluid properties =================================
+FLUID_PROPERTY
+  DIFFUSION_COEFFICIENT 1.d-9
+END
+
+#=========================== material properties ==============================
+MATERIAL_PROPERTY soil1
+  ID 1
+  POROSITY 0.15d0
+  TORTUOSITY 1.d0
+  SATURATION_FUNCTION cc1
+  ROCK_DENSITY 1200.d0 # kg/m^3_bulk
+  PERMEABILITY
+     PERM_ISO 2.36944d-11
+  /
+#  LONGITUDINAL_DISPERSIVITY 5.d0
+END
+
+#=========================== characteristic curves ============================
+CHARACTERISTIC_CURVES cc1
+  SATURATION_FUNCTION VAN_GENUCHTEN
+    ALPHA  1.d-4
+    M 0.5d0
+    LIQUID_RESIDUAL_SATURATION 0.1d0
+  /
+  PERMEABILITY_FUNCTION MUALEM_VG_LIQ
+    M 0.5d0
+    LIQUID_RESIDUAL_SATURATION 0.1d0
+  /
+END
+
+#=========================== output options ===================================
+OUTPUT
+  FORMAT HDF5
+  VELOCITY_AT_CENTER
+  PERIODIC TIME 1.d-2 y
+  PRINT_COLUMN_IDS
+END
+
+#=========================== times ============================================
+TIME
+  FINAL_TIME 1.d0 y
+  INITIAL_TIMESTEP_SIZE 1.d-12 y 
+  MAXIMUM_TIMESTEP_SIZE 1.d-2 y at 0.0 y
+#  MAXIMUM_TIMESTEP_SIZE 1.d-2 y at 0.05 y
+END
+
+#=========================== regions ==========================================
+REGION all
+  COORDINATES
+    0.d0 0.d0 0.d0
+    10.0 1.d-1 1.d-1
+  /
+END
+
+REGION west
+  FACE west
+  COORDINATES
+    0.d0 0.d0 0.d0
+    0.d0 1.d-1 1.d-1
+  /
+END
+
+REGION east
+  FACE east
+  COORDINATES
+    10.0 0.d0 0.d0
+    10.0 1.d-1 1.d-1
+  /
+END
+
+#=========================== flow conditions ==================================
+FLOW_CONDITION initial
+  TYPE
+    PRESSURE hydrostatic
+  /
+  DATUM 0.d0 0.d0 0.d0
+  PRESSURE 9.77879911e+06
+END
+
+FLOW_CONDITION east
+  TYPE
+    PRESSURE hydrostatic
+  /
+  DATUM 0.d0 0.d0 0.d0
+#  PRESSURE 9.76902031e+06 # If I set hgrad = 0.1
+#  PRESSURE 9.77872577e+06 # If I calculate hgrad from porewater velocity = 0.1 m/d
+  PRESSURE 9.77806570e+06 # If I calculate hgrad from porewater velocity = 1.0 m/d
+END
+
+#=========================== transport conditions =============================
+TRANSPORT_CONDITION initial
+  TYPE dirichlet
+  CONSTRAINT_LIST
+    0.d0 initial
+  /
+END
+
+TRANSPORT_CONDITION inlet
+  TYPE dirichlet_zero_gradient
+  CONSTRAINT_LIST
+    0.0  y injectant
+    0.05 y inlet
+  /
+END
+
+TRANSPORT_CONDITION outlet
+  TYPE dirichlet_zero_gradient
+  CONSTRAINT_LIST
+    0.d0 inlet
+  /
+END
+
+#=========================== constraints ======================================^M
+CONSTRAINT initial
+  CONCENTRATIONS
+    A(aq)   1.d-20 T
+    H+      -0.000303826 T
+    O2(aq)  2.84d-4 T
+    CrO4--  1.92d-5 T # 1000 ppb
+    S2O4--  1.d-20 T
+    S2O3--  1.d-20 T
+    SO3--   1.d-20 T
+    SO4--   1.d-20 T
+    Fe+++   1.d-20 T
+    Cr+++   1.d-20 T
+    HCO3-   0.000304914 T
+    Ca++    0.000304914 T
+    K+      1.00d-05
+# Required for synthetic groundwater only
+    Br-      4.00d-06 T
+    Cl-      3.00d-03 T
+    Mg++     3.00d-05 T
+    Na+      7.00d-03 T
+    SiO2(aq) 1.00d-03 T
+  /
+  MINERALS
+    Fe(OH)3(s) 3.86d-3  1.d3 # 1% mass percent
+    Cr(OH)3(s) 1.d-20 1.d3
+    Calcite    0.00999631 1.d3
+  /
+  IMMOBILE
+    slow_Fe++ 1.0d-20
+    fast_Fe++ 1.0d-20
+  /
+END
+
+CONSTRAINT inlet
+  CONCENTRATIONS
+    A(aq)   1.d-20 T
+    H+      -0.000303826 T
+    O2(aq)  2.84d-4 T
+    CrO4--  1.92d-5 T # 1000 ppb
+    S2O4--  1.d-20 T
+    S2O3--  1.d-20 T
+    SO3--   1.d-20 T
+    SO4--   1.d-20 T
+    Fe+++   1.d-20 T
+    Cr+++   1.d-20 T
+    HCO3-   0.000304914 T
+    Ca++    0.000304914 T
+    K+      1.00d-05
+# Required for synthetic groundwater only
+    Br-      4.00d-06 T
+    Cl-      3.00d-03 T
+    Mg++     3.00d-05 T
+    Na+      7.00d-03 T
+    SiO2(aq) 1.00d-03 T
+  /
+END
+
+CONSTRAINT injectant
+  CONCENTRATIONS
+    A(aq)   1.d-1 T
+    H+     -0.4 T
+    O2(aq)  2.84d-4 T
+    CrO4--  1.d-20 T
+    S2O4--  1.d-1  T
+    S2O3--  1.d-20 T
+    SO3--   1.d-20 T
+    SO4--   1.d-20 T
+    Fe+++   1.d-20 T
+    Cr+++   1.d-20 T
+    HCO3-   0.4 T
+    Ca++    1.d-20 T
+    K+      0.4 T
+# Required for synthetic groundwater only
+    Br-      1.0d-20 T
+    Cl-      1.0d-20 T
+    Mg++     1.0d-20 T
+    Na+      1.0d-20 T
+    SiO2(aq) 1.0d-20 T
+  /
+END
+
+#=========================== condition couplers ===============================
+# initial condition
+INITIAL_CONDITION
+  TRANSPORT_CONDITION initial
+  FLOW_CONDITION initial
+  REGION all
+END
+
+BOUNDARY_CONDITION west
+  TRANSPORT_CONDITION outlet
+  FLOW_CONDITION initial 
+  REGION west 
+END
+
+BOUNDARY_CONDITION east  
+  TRANSPORT_CONDITION outlet
+  FLOW_CONDITION east 
+  REGION east
+END
+
+#=========================== stratigraphy couplers ============================
+STRATA
+  REGION all 
+  MATERIAL soil1
+END
+
+END_SUBSURFACE
