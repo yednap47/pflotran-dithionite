@@ -49,7 +49,9 @@ sensparams = ["d",
               "k_s2o4_disp",
               "k_s2o4_fe3",
               "k_s2o4_o2",
-              "q"]
+              "q"
+              ]
+
 nstops = 5 # number of sensitivity runs
 mytime = 0.99
 myvar = ["Cr(OH)3(s)_VF"]
@@ -88,7 +90,7 @@ for sensparam in sensparams
 
     # make range for sensitivity analysis
     iparamloc = find(x -> x == sensparam,paramkeys)[1]
-    results[sensparam]["sensvals"] = sensvals = 10.^linspace(logparams_min[iparamloc],logparams_max[iparamloc],nstops)
+    results[sensparam]["sensvals"] = 10.^linspace(logparams_min[iparamloc],logparams_max[iparamloc],nstops)
 
     # loop for each sensitivity run
     success = Array{String}(0)
@@ -158,6 +160,7 @@ for sensparam in sensparams
         ax2[:set_ylabel]("total moles Cr(VI) reduced")
         ax2[:legend](loc=0)
         ax2[:set_xlim](10.0^-1.0,10.0^1.0)
+        ax2[:set_ylim](0.0,4e-2)
     end
 end
 plt.tight_layout()

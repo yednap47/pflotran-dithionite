@@ -91,7 +91,7 @@ CHEMISTRY
       RATE_CONSTANT 1.d-5 mol/m^2-sec
     /
   /
-  DATABASE /lclscratch/sach/Programs/pflotran-dithionite/chrome-dithionite-tests/chromium_dithionite_2017.dat
+  DATABASE /lclscratch/sach/Programs/pflotran-dithionite-git/chrome-dithionite-tests/chromium_dithionite_2017.dat
   ACTIVITY_COEFFICIENTS TIMESTEP
   LOG_FORMULATION
   OUTPUT
