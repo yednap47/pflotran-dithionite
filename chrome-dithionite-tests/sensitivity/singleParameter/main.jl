@@ -35,14 +35,22 @@ function runforabit(command, timelimit, pollinterval=1)
 end
 
 # User info
-sensparam = split(ARGS[1],"/")[2]
-rundir =  split(ARGS[1],"/")[1]
-nstops = parse(Int,ARGS[2])
+sensparams = [
+              "k_s2o4_disp",
+              "k_s2o4_o2",
+              "k_s2o4_fe3",
+              "k_fe2_o2_slow",
+              "k_fe2_o2_fast",
+              "k_fe2_cr6_slow",
+              "k_fe2_cr6_fast",
+              "is2o4",
+              "ifeoh3",
+              "d",
+              "q",
+              ]
 
-# for debug
-#sensparam = split("attempt1/k_s2o4_disp","/")[2]
-#rundir = split("attempt1/k_s2o4_disp","/")[1]
-#nstops = parse(Int,"5")
+rundir =  "attempt4"
+nstops = 5
 
 # Default parameters for writing MADS file
 fname = "../parameters.xlsx"
@@ -55,15 +63,14 @@ startover = "false"
 basedir = "/lclscratch/sach/Programs/pflotran-dithionite-git/chrome-dithionite-tests/sensitivity/singleParameter"
 pfle = "/lclscratch/sach/Programs/pflotran-dithionite-git/src/pflotran/pflotran"
 np = 8
-maxruntime = 10 * 60 # seconds from minutes
+maxruntime = 15 * 60 # seconds from minutes
 
 # write the mads file
 f = xlr.openxl(fname)
 paraminfo = xlr.readxl(fname, "mads!A2:D12")
 
 # make run directory
-if isdir(joinpath(basedir,rundir))
-else
+if !isdir(joinpath(basedir,rundir))
     mkdir(joinpath(basedir,rundir))
 end
 
@@ -96,38 +103,39 @@ paramkeys,params_min = transformmadsdata(logparams_min,logparamkeys)
 logparams_max = Mads.getparamsmax(madsdata)
 paramkeys,params_max = transformmadsdata(logparams_max,logparamkeys)
 
-# make range for sensitivity analysis
-iparamloc = find(x -> x == sensparam,paramkeys)[1]
-sensvals = linspace(params_min[iparamloc],params_max[iparamloc],nstops)
+# sensitivity analysis
+for sensparam in sensparams
+    # make range for sensitivity analysis
+    iparamloc = find(x -> x == sensparam,paramkeys)[1]
+    sensvals = 10.^linspace(logparams_min[iparamloc],logparams_max[iparamloc],nstops)
 
-# make a matrix [parameters, sensitivity run]
-paramarray = Array{Float64}(length(paramkeys),length(sensvals))
-for i in 1:length(sensvals)
-    paramarray[:,i] = params_init
-    paramarray[iparamloc,i] = sensvals[i]
-end
-
-# now lets make the inputfiles
-if isdir(joinpath(basedir,rundir,sensparam))
-else
-    mkdir(joinpath(basedir,rundir,sensparam))
-end
-
-for i in 1:length(sensvals)
-    if isdir(joinpath(basedir,rundir,sensparam,"run$i"))
-        println("$(joinpath(basedir,sensparam)) directory already exists")
-    else
-        mkdir(joinpath(basedir,rundir,sensparam,"run$i"))
+    # make a matrix [parameters, sensitivity run]
+    paramarray = Array{Float64}(length(paramkeys),length(sensvals))
+    for i in 1:length(sensvals)
+        paramarray[:,i] = params_init
+        paramarray[iparamloc,i] = sensvals[i]
     end
-    parameters = Dict(zip(paramkeys, paramarray[:,i]))
-    templatefilename = "../templateFiles/$simbasename.in.tpl"
-    outputfilename = joinpath(basedir,rundir,sensparam,"run$i/$simbasename.in")
-    Mads.writeparametersviatemplate(parameters, templatefilename, outputfilename)
-    cd(joinpath(basedir,rundir,sensparam,"run$i"))
-    try
-        println("starting $sensparam run $i")
-        runforabit(`mpirun -np $np $pfle -pflotranin $(simbasename).in > $(simbasename).txt`, maxruntime)
-    catch
+
+    # now lets make the inputfiles
+    if !isdir(joinpath(basedir,rundir,sensparam))
+        mkdir(joinpath(basedir,rundir,sensparam))
     end
-    cd(basedir)
+
+    for i in 1:length(sensvals)
+        if !isdir(joinpath(basedir,rundir,sensparam,"run$i"))
+            mkdir(joinpath(basedir,rundir,sensparam,"run$i"))
+        end
+        parameters = Dict(zip(paramkeys, paramarray[:,i]))
+        templatefilename = "../templateFiles/$simbasename.in.tpl"
+        outputfilename = joinpath(basedir,rundir,sensparam,"run$i/$simbasename.in")
+        Mads.writeparametersviatemplate(parameters, templatefilename, outputfilename)
+        cd(joinpath(basedir,rundir,sensparam,"run$i"))
+        try
+            println("starting $sensparam run $i")
+            runforabit(`mpirun -np $np $pfle -pflotranin $(simbasename).in > $(simbasename).txt`, maxruntime)
+        catch
+            warn("$(rundir)/$(sensparam)/run$(i) failed :()")
+        end
+        cd(basedir)
+    end
 end

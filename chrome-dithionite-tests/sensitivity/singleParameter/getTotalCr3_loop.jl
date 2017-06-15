@@ -37,7 +37,7 @@ end
 # User info
 #------------------------------------------------------------------------------
 basedir = "/lclscratch/sach/Programs/pflotran-dithionite-git/chrome-dithionite-tests/sensitivity/singleParameter"
-rundir = "attempt1"
+rundir = "attempt4"
 simbasename = "1d-allReactions-10m-uniformVelocity"
 sensparams = ["d",
               "ifeoh3",
@@ -88,7 +88,7 @@ for sensparam in sensparams
 
     # make range for sensitivity analysis
     iparamloc = find(x -> x == sensparam,paramkeys)[1]
-    results[sensparam]["sensvals"] = linspace(params_min[iparamloc],params_max[iparamloc],nstops)
+    results[sensparam]["sensvals"] = sensvals = 10.^linspace(logparams_min[iparamloc],logparams_max[iparamloc],nstops)
 
     # loop for each sensitivity run
     success = Array{String}(0)
@@ -111,6 +111,7 @@ end
 # Spider plots
 #------------------------------------------------------------------------------
 f, ax = plt.subplots(3, 4, figsize=(15,12))
+majorFormatter = plt.matplotlib[:ticker][:FormatStrFormatter]("%0.2e")
 plotindex = 1
 for sensparam in sensparams
     # find the index of sensparam in paramkeys to get base value in params_init
@@ -122,8 +123,9 @@ for sensparam in sensparams
     if length(success_summary[success_summary.=="no"])>0
         warn("$sensparam sensitivity analysis failed!")
     else
-        ax[plotindex][:scatter](results[sensparam]["sensvals"]/basevalue,results[sensparam]["totCr3"])
+        ax[plotindex][:plot](results[sensparam]["sensvals"]/basevalue,results[sensparam]["totCr3"],marker="x")
         ax[plotindex][:set_xlim](minimum(results[sensparam]["sensvals"])/basevalue,maximum(results[sensparam]["sensvals"])/basevalue)
+        ax[plotindex][:yaxis][:set_major_formatter](majorFormatter)
         ax[plotindex][:set_title](sensparam)
         ax[plotindex][:set_xscale]("log")
         ax[plotindex][:set_xlabel]("Fraction of base value")
@@ -133,3 +135,30 @@ for sensparam in sensparams
 end
 plt.tight_layout()
 f[:canvas][:draw]() # Update the figure
+
+
+f2, ax2 = plt.subplots(figsize=(8,7))
+mycmap = plt.get_cmap("Paired",length(sensparams)+1)
+for sensparam in sensparams
+    # find the index of sensparam in paramkeys to get base value in params_init
+    i = find(x -> x == sensparam,paramkeys)[1]
+    basevalue = params_init[i]
+
+    # plot loop
+    success_summary = results[sensparam]["success"]
+    if length(success_summary[success_summary.=="no"])>0
+        warn("$sensparam sensitivity analysis failed!")
+    else
+        ax2[:plot](results[sensparam]["sensvals"]/basevalue,results[sensparam]["totCr3"],marker="x",color=mycmap(i),label=sensparam)
+        ax2[:set_xlim](minimum(results[sensparam]["sensvals"])/basevalue,maximum(results[sensparam]["sensvals"])/basevalue)
+        ax2[:yaxis][:set_major_formatter](majorFormatter)
+        ax2[:set_title](sensparam)
+        ax2[:set_xscale]("log")
+        ax2[:set_xlabel]("Fraction of base value")
+        ax2[:set_ylabel]("total moles Cr(VI) reduced")
+        ax2[:legend](loc=0)
+        ax2[:set_xlim](10.0^-1.0,10.0^1.0)
+    end
+end
+plt.tight_layout()
+f2[:canvas][:draw]() # Update the figure

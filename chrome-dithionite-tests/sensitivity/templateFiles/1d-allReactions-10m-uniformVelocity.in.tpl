@@ -106,6 +106,7 @@ END
 #=========================== solver options ===================================
 NEWTON_SOLVER TRANSPORT
 #  RTOL 1.d-12
+#  STOL 1.d-30
 END
 
 #=========================== discretization ===================================
@@ -181,6 +182,9 @@ OUTPUT
   VELOCITY_AT_CENTER
   PERIODIC TIME 1.d-2 y
   PRINT_COLUMN_IDS
+  MASS_BALANCE_FILE
+    PERIODIC TIME  1.d-2 y
+  /
 END
 
 #=========================== times ============================================
