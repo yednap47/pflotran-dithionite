@@ -181,6 +181,9 @@ OUTPUT
   VELOCITY_AT_CENTER
   PERIODIC TIME 1.d-2 y
   PRINT_COLUMN_IDS
+  MASS_BALANCE_FILE
+    PERIODIC TIME  1.d-2 y
+  /
 END
 
 #=========================== times ============================================
