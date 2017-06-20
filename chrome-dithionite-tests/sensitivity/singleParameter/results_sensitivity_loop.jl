@@ -18,41 +18,28 @@ function getTotalCr3(istop,filename)
     return total_moles
 end
 
-function transformmadsdata(logparamsval,logparamkeys)
-    paramkeys = Array{String}(length(logparamkeys))
-    paramsval = Array{Float64}(length(logparamsval))
-    for i in 1:length(paramsval)
-        if contains(logparamkeys[1],"log_")
-            paramkeys[i] = split(logparamkeys[i],"log_")[2]
-            paramsval[i] = 10^logparamsval[i]
-        else
-            paramkeys[i] = logparamkeys[i]
-            paramsval[i] = logparamsval[i]
-        end
-    end
-    return paramkeys, paramsval
-end
-
 #------------------------------------------------------------------------------
 # User info
 #------------------------------------------------------------------------------
 basedir = "/lclscratch/sach/Programs/pflotran-dithionite-git/chrome-dithionite-tests/sensitivity/singleParameter"
-rundir = "attempt4"
-simbasename = "1d-allReactions-10m-uniformVelocity"
-sensparams = ["d",
-              "ifeoh3",
-              "is2o4",
-              "k_fe2_cr6_fast",
-              "k_fe2_cr6_slow",
-              "k_fe2_o2_fast",
-              "k_fe2_o2_slow",
+rundir = "attempt6"
+simbasename = "1d-allReactions-10m-uniformVelocity-v2"
+sensparams = [
               "k_s2o4_disp",
-              "k_s2o4_fe3",
               "k_s2o4_o2",
-              "q"
+              "k_s2o4_fe3",
+              "fraction",
+              "k_fe2_o2_fast",
+              "factor_k_fe2_o2_slow",
+              "k_fe2_cr6_fast",
+              "factor_k_fe2_cr6_slow",
+              "is2o4",
+              "ifeoh3",
+              "d",
+              "q",
               ]
 
-nstops = 5 # number of sensitivity runs
+nstops = 3 # number of sensitivity runs
 mytime = 0.99
 myvar = ["Cr(OH)3(s)_VF"]
 MV = 33.1/(100)^3 # m^3/mol
@@ -64,20 +51,21 @@ dx= vcat(0.01*ones(200),0.1*ones(40),0.2*ones(20))
 dy = 0.1
 dz = 0.1
 
+# plot stuff
+mysize = 11
+
 #------------------------------------------------------------------------------
 # Get parameter info from madsfile
 #------------------------------------------------------------------------------
+# read the mads file
 madsdata = Mads.loadmadsfile(joinpath(rundir,"$(simbasename).mads"))
 
 # get param names (non-log) and param ranges
 logparams_init = Mads.getparamsinit(madsdata)
-logparamkeys = Mads.getparamkeys(madsdata)
 logparams_min = Mads.getparamsmin(madsdata)
 logparams_max = Mads.getparamsmax(madsdata)
-
-paramkeys,params_init = transformmadsdata(logparams_init,logparamkeys)
-paramkeys,params_min = transformmadsdata(logparams_min,logparamkeys)
-paramkeys,params_max = transformmadsdata(logparams_max,logparamkeys)
+logparamkeys = Mads.getparamkeys(madsdata)
+paramkeys = map(x->split(x,"log_")[2],logparamkeys)
 
 #------------------------------------------------------------------------------
 # Build dictionary of results
@@ -86,16 +74,27 @@ paramkeys,params_max = transformmadsdata(logparams_max,logparamkeys)
 results = Dict()
 for sensparam in sensparams
     @show sensparam
+
     results[sensparam] = Dict()
 
     # make range for sensitivity analysis
     iparamloc = find(x -> x == sensparam,paramkeys)[1]
-    results[sensparam]["sensvals"] = 10.^linspace(logparams_min[iparamloc],logparams_max[iparamloc],nstops)
+
+    sensvals = Array{Float64}(0)
+    sensvals = append!(sensvals,logparams_init[iparamloc])
+
+    # append param values below base value
+    smallparams = collect(linspace(logparams_min[iparamloc],logparams_init[iparamloc],nstops+1)[1:end-1])
+    largeparams = collect(linspace(logparams_init[iparamloc],logparams_max[iparamloc],nstops+1)[2:end])
+    sensvals = append!(smallparams,sensvals)
+    sensvals = append!(sensvals,largeparams)
+    results[sensparam]["sensvals"] = 10.^sensvals
+    @show results[sensparam]["sensvals"]
 
     # loop for each sensitivity run
     success = Array{String}(0)
     sensresults = Array{Float64}(0)
-    for istop in 1:nstops
+    for istop in 1:nstops*2+1
         filename = joinpath(basedir,rundir,sensparam,"run$istop","$(simbasename).h5")
         try
             totalCr3 = getTotalCr3(istop,filename)
@@ -118,7 +117,7 @@ plotindex = 1
 for sensparam in sensparams
     # find the index of sensparam in paramkeys to get base value in params_init
     i = find(x -> x == sensparam,paramkeys)[1]
-    basevalue = params_init[i]
+    basevalue = 10^logparams_init[i]
     
     # plot loop
     success_summary = results[sensparam]["success"]
@@ -144,7 +143,7 @@ mycmap = plt.get_cmap("Paired",length(sensparams)+1)
 for sensparam in sensparams
     # find the index of sensparam in paramkeys to get base value in params_init
     i = find(x -> x == sensparam,paramkeys)[1]
-    basevalue = params_init[i]
+    basevalue = 10^logparams_init[i]
 
     # plot loop
     success_summary = results[sensparam]["success"]
@@ -156,12 +155,14 @@ for sensparam in sensparams
         ax2[:yaxis][:set_major_formatter](majorFormatter)
         ax2[:set_title](sensparam)
         ax2[:set_xscale]("log")
+        ax2[:set_yscale]("log")
         ax2[:set_xlabel]("Fraction of base value")
         ax2[:set_ylabel]("total moles Cr(VI) reduced")
-        ax2[:legend](loc=0)
+        ax2[:legend](loc=0,frameon=false,fontsize=mysize-2)
         ax2[:set_xlim](10.0^-1.0,10.0^1.0)
-        ax2[:set_ylim](0.0,4e-2)
+        # ax2[:set_ylim](0.0,4e-2)
     end
 end
 plt.tight_layout()
 f2[:canvas][:draw]() # Update the figure
+plt.savefig("results_$(rundir).png")

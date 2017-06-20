@@ -2,22 +2,6 @@ import Mads
 import ExcelReaders
 xlr = ExcelReaders
 
-function transformmadsdata(logparamsval,logparamkeys)
-    # Transforms log parameters in madsdict to non-log 
-    paramkeys = Array{String}(length(logparamkeys))
-    paramsval = Array{Float64}(length(logparamsval))
-    for i in 1:length(paramsval)
-        if contains(logparamkeys[1],"log_")
-            paramkeys[i] = split(logparamkeys[i],"log_")[2]
-            paramsval[i] = 10^logparamsval[i]
-        else
-            paramkeys[i] = logparamkeys[i]
-            paramsval[i] = logparamsval[i]
-        end
-    end
-    return paramkeys, paramsval
-end
-
 function runforabit(command, timelimit, pollinterval=1)
     # kills terminal command if time limit is exceeded
     # note, all times are in seconds
@@ -39,24 +23,26 @@ sensparams = [
               "k_s2o4_disp",
               "k_s2o4_o2",
               "k_s2o4_fe3",
-              "k_fe2_o2_slow",
+              "fraction",
               "k_fe2_o2_fast",
-              "k_fe2_cr6_slow",
+              "factor_k_fe2_o2_slow",
               "k_fe2_cr6_fast",
+              "factor_k_fe2_cr6_slow",
               "is2o4",
               "ifeoh3",
               "d",
               "q",
               ]
 
-rundir =  "attempt4"
-nstops = 5
+rundir =  "attempt6"
+nstops = 3 # nstops below, nstops above base
 
 # Default parameters for writing MADS file
-fname = "../parameters.xlsx"
+fname = "../parameters_v2.xlsx"
+sheetname = "mads_tightened"
 jcommand = "read_data.jl"
 soltype = "external"
-simbasename = "1d-allReactions-10m-uniformVelocity"
+simbasename = "1d-allReactions-10m-uniformVelocity-v2"
 startover = "false"
 
 # pflotran information
@@ -67,7 +53,7 @@ maxruntime = 15 * 60 # seconds from minutes
 
 # write the mads file
 f = xlr.openxl(fname)
-paraminfo = xlr.readxl(fname, "mads!A2:D12")
+paraminfo = xlr.readxl(fname, "$(sheetname)!A2:D13")
 
 # make run directory
 if !isdir(joinpath(basedir,rundir))
@@ -94,27 +80,70 @@ madsdata = Mads.loadmadsfile(joinpath(rundir,"$(simbasename).mads"))
 
 # get param names (non-log) and param ranges
 logparams_init = Mads.getparamsinit(madsdata)
-logparamkeys = Mads.getparamkeys(madsdata)
-paramkeys,params_init = transformmadsdata(logparams_init,logparamkeys)
-
 logparams_min = Mads.getparamsmin(madsdata)
-paramkeys,params_min = transformmadsdata(logparams_min,logparamkeys)
-
 logparams_max = Mads.getparamsmax(madsdata)
-paramkeys,params_max = transformmadsdata(logparams_max,logparamkeys)
+logparamkeys = Mads.getparamkeys(madsdata)
+paramkeys = map(x->split(x,"log_")[2],logparamkeys)
 
 # sensitivity analysis
 for sensparam in sensparams
+    # reinitialize paramkeys and params vals
+    paramkeys_act = deepcopy(paramkeys)
+    logparams_init_act = deepcopy(logparams_init)
+    logparams_min_act = deepcopy(logparams_min)
+    logparams_max_act = deepcopy(logparams_max)
+    
     # make range for sensitivity analysis
     iparamloc = find(x -> x == sensparam,paramkeys)[1]
-    sensvals = 10.^linspace(logparams_min[iparamloc],logparams_max[iparamloc],nstops)
+
+    # find indices for fast and slow site parameters
+    ik_fe2_o2_fast = find(x -> x == "k_fe2_o2_fast",paramkeys)[1]
+    ik_fe2_cr6_fast = find(x -> x == "k_fe2_cr6_fast",paramkeys)[1]
+    ik_fe2_o2_slow = find(x -> x == "factor_k_fe2_o2_slow",paramkeys)[1]
+    ik_fe2_cr6_slow = find(x -> x == "factor_k_fe2_cr6_slow",paramkeys)[1]
+    
+    # calculate params for slow sites kinetic rate constants
+    logparams_init_act[ik_fe2_o2_slow] =  log10(10^logparams_init[ik_fe2_o2_fast]  * 10^logparams_init[ik_fe2_o2_slow])
+    logparams_init_act[ik_fe2_cr6_slow] = log10(10^logparams_init[ik_fe2_cr6_fast] * 10^logparams_init[ik_fe2_cr6_slow])
+    logparams_min_act[ik_fe2_o2_slow] =   log10(10^logparams_init[ik_fe2_o2_fast]  * 10^logparams_min[ik_fe2_o2_slow])
+    logparams_min_act[ik_fe2_cr6_slow] =  log10(10^logparams_init[ik_fe2_cr6_fast] * 10^logparams_min[ik_fe2_cr6_slow])
+    logparams_max_act[ik_fe2_o2_slow] =   log10(10^logparams_init[ik_fe2_o2_fast]  * 10^logparams_max[ik_fe2_o2_slow])
+    logparams_max_act[ik_fe2_cr6_slow] =  log10(10^logparams_init[ik_fe2_cr6_fast] * 10^logparams_max[ik_fe2_cr6_slow])
+
+    # rename paramkeys for slow sites kinetic rate constants
+    paramkeys_act[ik_fe2_o2_slow] = "k_fe2_o2_slow"
+    paramkeys_act[ik_fe2_cr6_slow] = "k_fe2_cr6_slow"
+
+    sensvals = Array{Float64}(0)
+    sensvals = append!(sensvals,logparams_init_act[iparamloc])
+
+    # append param values below base value
+    smallparams = collect(linspace(logparams_min_act[iparamloc],logparams_init_act[iparamloc],nstops+1)[1:end-1])
+    largeparams = collect(linspace(logparams_init_act[iparamloc],logparams_max_act[iparamloc],nstops+1)[2:end])
+    sensvals = append!(smallparams,sensvals)
+    sensvals = append!(sensvals,largeparams)
+    sensvals = 10.^sensvals
+    @show sensvals 
 
     # make a matrix [parameters, sensitivity run]
     paramarray = Array{Float64}(length(paramkeys),length(sensvals))
     for i in 1:length(sensvals)
-        paramarray[:,i] = params_init
-        paramarray[iparamloc,i] = sensvals[i]
+        paramarray[:,i] = 10.^logparams_init_act
+        if sensparam == "k_fe2_o2_fast"
+            paramarray[iparamloc,i] = sensvals[i]
+            paramarray[ik_fe2_o2_slow,i] = 10^logparams_init[ik_fe2_o2_slow] * sensvals[i]
+        elseif sensparam == "k_fe2_cr6_fast"
+            paramarray[iparamloc,i] = sensvals[i]
+            paramarray[ik_fe2_cr6_slow,i] = 10^logparams_init[ik_fe2_cr6_slow] * sensvals[i]
+        elseif sensparam == "factor_k_fe2_o2_slow"
+            paramarray[iparamloc,i] = sensvals[i]
+        elseif sensparam == "factor_k_fe2_cr6_slow"
+            paramarray[iparamloc,i] = sensvals[i]
+        else
+            paramarray[iparamloc,i] = sensvals[i]
+        end
     end
+#    @show paramarray
 
     # now lets make the inputfiles
     if !isdir(joinpath(basedir,rundir,sensparam))
@@ -125,7 +154,7 @@ for sensparam in sensparams
         if !isdir(joinpath(basedir,rundir,sensparam,"run$i"))
             mkdir(joinpath(basedir,rundir,sensparam,"run$i"))
         end
-        parameters = Dict(zip(paramkeys, paramarray[:,i]))
+        parameters = Dict(zip(paramkeys_act, paramarray[:,i]))
         templatefilename = "../templateFiles/$simbasename.in.tpl"
         outputfilename = joinpath(basedir,rundir,sensparam,"run$i/$simbasename.in")
         Mads.writeparametersviatemplate(parameters, templatefilename, outputfilename)
