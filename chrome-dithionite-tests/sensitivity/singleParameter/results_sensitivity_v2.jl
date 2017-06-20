@@ -42,6 +42,7 @@ results_base = sachFun.readObsDataset(filename,myvar,dataframe=true)
 # Calculate the total number of moles of Cr that was immobilized
 #------------------------------------------------------------------------------
 warn("need more norxn base cases for this to work (q)")
+# In the case where flowrate changes, more q means more Cr flux so background value will be off
 summary["tot mol cr reduced"] = abs(results_base[Symbol("east CrO4-- [mol]")][end])-abs(results[Symbol("east CrO4-- [mol]")][end])
 
 #------------------------------------------------------------------------------
@@ -74,4 +75,6 @@ summary["tot mol o2 consumed"] = abs(results_base[Symbol("east O2(aq) [mol]")][e
 # Calculate the amount of s2o4 consumed
 #------------------------------------------------------------------------------
 warn("need more norxn base cases for this to work (q AND is2o4)")
+# In the case where flowrate changes, more q means more is2o4 flux so background value will be off
+# In the case where [is2o4] changes, more [is2o4] so background value will be off
 summary["tot mol s2o4 consumed"] = abs(results_base[Symbol("east S2O4-- [mol]")][end])-abs(results[Symbol("east S2O4-- [mol]")][end])
