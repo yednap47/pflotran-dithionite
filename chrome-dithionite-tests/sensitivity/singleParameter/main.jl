@@ -34,7 +34,7 @@ sensparams = [
               "q",
               ]
 
-rundir =  "attempt6"
+rundir =  "attempt8"
 nstops = 3 # nstops below, nstops above base
 
 # Default parameters for writing MADS file
@@ -48,7 +48,7 @@ startover = "false"
 # pflotran information
 basedir = "/lclscratch/sach/Programs/pflotran-dithionite-git/chrome-dithionite-tests/sensitivity/singleParameter"
 pfle = "/lclscratch/sach/Programs/pflotran-dithionite-git/src/pflotran/pflotran"
-np = 8
+np = 4
 maxruntime = 15 * 60 # seconds from minutes
 
 # write the mads file

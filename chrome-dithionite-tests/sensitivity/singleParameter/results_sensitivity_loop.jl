@@ -22,7 +22,7 @@ end
 # User info
 #------------------------------------------------------------------------------
 basedir = "/lclscratch/sach/Programs/pflotran-dithionite-git/chrome-dithionite-tests/sensitivity/singleParameter"
-rundir = "attempt6"
+rundir = "attempt8"
 simbasename = "1d-allReactions-10m-uniformVelocity-v2"
 sensparams = [
               "k_s2o4_disp",
