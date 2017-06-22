@@ -13,7 +13,7 @@ istop = 3 # parameter we care about
 
 # pflotran information
 basedir = "/lclscratch/sach/Programs/pflotran-dithionite-git/chrome-dithionite-tests/sensitivity/singleParameter"
-rundir = "attempt3"
+rundir = "attempt1"
 myname = "1d-allReactions-10m-uniformVelocity"
 coord_name = "X"
 

@@ -34,15 +34,15 @@ sensparams = [
               "q",
               ]
 
-rundir =  "attempt8"
+rundir =  "attempt1"
 nstops = 3 # nstops below, nstops above base
 
 # Default parameters for writing MADS file
-fname = "../parameters_v2.xlsx"
+fname = "../parameters.xlsx"
 sheetname = "mads_tightened"
 jcommand = "read_data.jl"
 soltype = "external"
-simbasename = "1d-allReactions-10m-uniformVelocity-v2"
+simbasename = "1d-allReactions-10m-uniformVelocity"
 startover = "false"
 
 # pflotran information

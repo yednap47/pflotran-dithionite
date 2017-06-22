@@ -59,7 +59,7 @@ CHEMISTRY
       RATE_CONSTANT !k_s2o4_fe3! # /s
       SSA 175 # m^2/g
       ROCK_DENSITY 1200.d0 # m^3/m^3_bulk
-      FRACTION 0.6
+      FRACTION !fraction!
       EPS 1.d-50
     /
     FE2_O2
@@ -191,7 +191,7 @@ END
 TIME
   FINAL_TIME 1.d0 y
   INITIAL_TIMESTEP_SIZE 1.d-12 y 
-  MAXIMUM_TIMESTEP_SIZE 1.d-4 y at 0.0 y
+  MAXIMUM_TIMESTEP_SIZE 1.d-5 y at 0.0 y
   MAXIMUM_TIMESTEP_SIZE 1.d-2 y at 0.05 y
 END
 
