@@ -22,7 +22,7 @@ end
 # User info
 #------------------------------------------------------------------------------
 basedir = "/lclscratch/sach/Programs/pflotran-dithionite-git/chrome-dithionite-tests/sensitivity/singleParameter"
-rundir = "attempt1"
+rundir = "attempt2"
 simbasename = "1d-allReactions-10m-uniformVelocity"
 sensparams = [
               "k_s2o4_disp",
@@ -40,7 +40,7 @@ sensparams = [
               ]
 
 nstops = 3 # number of sensitivity runs
-mytime = 0.99
+mytime = 365
 myvar = ["Cr(OH)3(s)_VF"]
 MV = 33.1/(100)^3 # m^3/mol
 coord_name = "X"
@@ -122,7 +122,7 @@ for sensparam in sensparams
     # plot loop
     success_summary = results[sensparam]["success"]
     if length(success_summary[success_summary.=="no"])>0
-        warn("$sensparam sensitivity analysis failed!")
+        # warn("$sensparam sensitivity analysis failed!")
     else
         ax[plotindex][:plot](results[sensparam]["sensvals"]/basevalue,results[sensparam]["totCr3"],marker="x")
         ax[plotindex][:set_xlim](minimum(results[sensparam]["sensvals"])/basevalue,maximum(results[sensparam]["sensvals"])/basevalue)

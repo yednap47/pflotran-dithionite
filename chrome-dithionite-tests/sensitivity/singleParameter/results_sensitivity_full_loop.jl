@@ -22,7 +22,7 @@ end
 # User info
 #------------------------------------------------------------------------------
 basedir = "/lclscratch/sach/Programs/pflotran-dithionite-git/chrome-dithionite-tests/sensitivity/singleParameter"
-rundir = "attempt1"
+rundir = "attempt2"
 simbasename = "1d-allReactions-10m-uniformVelocity"
 sensparams = [
               "k_s2o4_disp",
@@ -55,7 +55,7 @@ coolnames =  [
               ]
 
 nstops = 3 # number of sensitivity runs
-mytime = 0.99
+mytime = 365
 MV = 33.1/(100)^3 # m^3/mol
 coord_name = "X"
 
@@ -123,7 +123,7 @@ for sensparam in sensparams
 
     # Get the MAXIMUM amount of Fe reduced using the mass balance file
     # Get the TOTA amount of s2o4 consumed using the mass balance file
-    myvar = ["Global fast_Fe++", "Global slow_Fe++", "east CrO4-- [mol]", "east CrO4-- [mol/y]", "east Cr+++ [mol]"]
+    myvar = ["Global fast_Fe++", "Global slow_Fe++", "east CrO4-- [mol]", "east CrO4-- [mol/d]", "east Cr+++ [mol]"]
     sensresults_fe2 = Array{Float64}(0) # maximum surface bound fe2
     sensresults_cr6 = Array{Float64}(0) # moles of cr6 that reach the outflow
     for istop in 1:nstops*2+1
