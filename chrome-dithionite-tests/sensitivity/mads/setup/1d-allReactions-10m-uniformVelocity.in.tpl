@@ -178,21 +178,21 @@ END
 
 #=========================== output options ===================================
 OUTPUT
-  FORMAT HDF5
+#  FORMAT HDF5
   VELOCITY_AT_CENTER
-  TIMES d 1.0 6.0 11.0 36.0 41.0 46.0 56.0 76.0 81.0 86.0 96.0
+  TIMES d 1.0 11.0 21.0 31.0 61.0 81.0 91.0 101.0 121.0 151.0 161.0 171.0 181.0 191.0 201.0 211.0 221.0 231.0 241.0 251.0 261.0 271.0 281.0 291.0 301.0 311.0 321.0 331.0 341.0 351.0 361.0
   PRINT_COLUMN_IDS
   MASS_BALANCE_FILE
-  TIMES d 1.0 6.0 11.0 36.0 41.0 46.0 56.0 76.0 81.0 86.0 96.0
+  TIMES d 1.0 11.0 21.0 31.0 61.0 81.0 91.0 101.0 121.0 151.0 161.0 171.0 181.0 191.0 201.0 211.0 221.0 231.0 241.0 251.0 261.0 271.0 281.0 291.0 301.0 311.0 321.0 331.0 341.0 351.0 361.0
   /
 END
 
 #=========================== times ============================================
 TIME
-  FINAL_TIME 100.d0 d
+  FINAL_TIME 365.d0 d
   INITIAL_TIMESTEP_SIZE 1.d-10 d 
   MAXIMUM_TIMESTEP_SIZE 1.d-1 d at 0.0 d
-  MAXIMUM_TIMESTEP_SIZE 1.d0 d at 20.0 d
+  MAXIMUM_TIMESTEP_SIZE 1.d0 d at 15.0 d
 END
 
 #=========================== regions ==========================================
@@ -233,7 +233,7 @@ TRANSPORT_CONDITION inlet
   TYPE dirichlet_zero_gradient
   CONSTRAINT_LIST
     0.0  d injectant
-    20.0 d inlet
+    15.0 d inlet
   /
 END
 

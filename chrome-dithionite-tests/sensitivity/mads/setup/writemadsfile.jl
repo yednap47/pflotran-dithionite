@@ -44,7 +44,7 @@ function madstargets(outfile::IOStream, basedir::String, myvar::Array{String,1},
     for i in 1:length(obstimes_nn)
          write(outfile, "- $(caltag)_t$(i): ")
          @printf(outfile, "{target: %0.5e, ", targets_noisy_nn[i])
-         @printf(outfile, "weight: 1.0, ")
+         @printf(outfile, "weight: 100.0, ")
          @printf(outfile, "time: %.2f}\n", obstimes_nn[i])
     end
     
@@ -71,13 +71,13 @@ simbasename = "1d-allReactions-10m-uniformVelocity"
 plotresults = true # for plotting targets
 myvar = ["east CrO4-- [mol/d]"]
 mystd = 2.e-6 # standard deviation
-skipfactor = 5 # resolution of targets vs simulation output
+skipfactor = 10 # resolution of targets vs simulation output
 caltag = "Cr6_Obs"
 timeUnits = "d"
 
 # Default parameters for writing MADS file
 paramfilename = "../../parameters.xlsx"
-sheetname = "mads_efast"
+sheetname = "mads_efast_tightened"
 jcommand = "read_data.jl"
 soltype = "external"
 startover = "false"
