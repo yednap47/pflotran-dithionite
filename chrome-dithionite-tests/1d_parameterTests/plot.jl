@@ -64,4 +64,4 @@ myvar = [
 # "Total_S2O4-- [M]",
 ]
 
-results = sachFun.readh5_1D("$(filename).h5",myvar,coord_name,0.1)
+results = sachFun.readh5_1D("$(filename).h5",myvar,coord_name,37.0)
