@@ -57,4 +57,4 @@ Parameters:
 Solution: external
 Templates:
 - tmp1: {tpl: 1d-allReactions-10m-uniformVelocity.in.tpl, write: 1d-allReactions-10m-uniformVelocity.in}
-Restart: false
+Restart: true

@@ -1,6 +1,6 @@
 import(Mads)
 
-Mads.setprocs(7+1)
+Mads.setprocs(8+1)
 reload("Mads")
 
 tic()
