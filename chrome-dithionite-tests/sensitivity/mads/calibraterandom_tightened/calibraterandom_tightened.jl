@@ -1,5 +1,8 @@
 import(Mads)
 
+Mads.setprocs(7+1)
+reload("Mads")
+
 tic()
 # Load mads file, set weights
 md = Mads.loadmadsfile("1d-allReactions-10m-uniformVelocity-tightened.mads")
