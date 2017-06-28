@@ -5,7 +5,7 @@ reload("Mads")
 
 tic()
 # Load mads file, set weights
-md = Mads.loadmadsfile("1d-allReactions-10m-uniformVelocity-tightened.mads")
+@everywhere md = Mads.loadmadsfile("1d-allReactions-10m-uniformVelocity-tightened.mads")
 
 # Mads.invobsweights!(md, 0.01)
 # 
