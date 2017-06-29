@@ -34,30 +34,30 @@ p = hcat(map(i->collect(values(r[i,3])), 1:n)...)'
 np = length(pnames)
 
 # Remove erroneous calibrations
-# obj_fun_threshold = 2000
-# r_goodfit = r[find(r[:,1].<obj_fun_threshold),:]
-# p_goodfit = hcat(map(i->collect(values(r_goodfit[i,3])), 1:length(r_goodfit[:,1]))...)'
-# 
-# info("Histograms of the estimated model parameters")
-# for i = 1:np
-#   f = Gadfly.plot(x=p[:,i], Gadfly.Guide.xlabel(pnames[i]), Gadfly.Geom.histogram())
-#   Gadfly.draw(Gadfly.PNG("estimated_parameter_histogram_raw_$(pnames[i]).png", 6Gadfly.inch, 4Gadfly.inch), f)
-#   f2 = Gadfly.plot(x=p_goodfit[:,i], Gadfly.Guide.xlabel(pnames[i]), Gadfly.Geom.histogram())
-#   Gadfly.draw(Gadfly.PNG("estimated_parameter_histogram_goodfit_$(pnames[i]).png", 6Gadfly.inch, 4Gadfly.inch), f2)
-# end
-# 
-# results = Dict()
-# results["pmin"] = map(i->min(p[:,i]...), 1:np)
-# results["pmax"] = map(i->max(p[:,i]...), 1:np)
-# results["pmean"] = map(i->mean(p[:,i]), 1:np)
-# results["pstd"] = map(i->std(p[:,i]), 1:np)
-# 
-# results_goodfit = Dict()
-# results_goodfit["pmin"] = map(i->min(p_goodfit[:,i]...), 1:np)
-# results_goodfit["pmax"] = map(i->max(p_goodfit[:,i]...), 1:np)
-# results_goodfit["pmean"] = map(i->mean(p_goodfit[:,i]), 1:np)
-# results_goodfit["pstd"] = map(i->std(p_goodfit[:,i]), 1:np)
-# 
+obj_fun_threshold = 2000
+r_goodfit = r[find(r[:,1].<obj_fun_threshold),:]
+p_goodfit = hcat(map(i->collect(values(r_goodfit[i,3])), 1:length(r_goodfit[:,1]))...)'
+
+info("Histograms of the estimated model parameters")
+for i = 1:np
+  f = Gadfly.plot(x=p[:,i], Gadfly.Guide.xlabel(pnames[i]), Gadfly.Geom.histogram())
+  Gadfly.draw(Gadfly.PNG("estimated_parameter_histogram_raw_$(pnames[i]).png", 6Gadfly.inch, 4Gadfly.inch), f)
+  f2 = Gadfly.plot(x=p_goodfit[:,i], Gadfly.Guide.xlabel(pnames[i]), Gadfly.Geom.histogram())
+  Gadfly.draw(Gadfly.PNG("estimated_parameter_histogram_goodfit_$(pnames[i]).png", 6Gadfly.inch, 4Gadfly.inch), f2)
+end
+
+results = Dict()
+results["pmin"] = map(i->min(p[:,i]...), 1:np)
+results["pmax"] = map(i->max(p[:,i]...), 1:np)
+results["pmean"] = map(i->mean(p[:,i]), 1:np)
+results["pstd"] = map(i->std(p[:,i]), 1:np)
+
+results_goodfit = Dict()
+results_goodfit["pmin"] = map(i->min(p_goodfit[:,i]...), 1:np)
+results_goodfit["pmax"] = map(i->max(p_goodfit[:,i]...), 1:np)
+results_goodfit["pmean"] = map(i->mean(p_goodfit[:,i]), 1:np)
+results_goodfit["pstd"] = map(i->std(p_goodfit[:,i]), 1:np)
+
 # info("Scatter plot of parameter estimates")
 # f = Gadfly.plot(x=p_goodfit[:,1], y=p_goodfit[:,2],
 #       Gadfly.Geom.point, 
@@ -67,3 +67,4 @@ np = length(pnames)
 # Gadfly.draw(Gadfly.PNG("scatter_plot_$(pnames[1])vs_$(pnames[2]).png", 6Gadfly.inch, 4Gadfly.inch), f)
 
 toc()
+# 42.93381083217778
