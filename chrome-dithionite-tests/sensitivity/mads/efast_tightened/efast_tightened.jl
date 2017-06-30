@@ -25,3 +25,4 @@ Mads.plotobsSAresults(md, efastresult,
                       xtitle = "x", ytitle = "y")
 
 toc()
+# 71.42651862881083 hours

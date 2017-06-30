@@ -67,4 +67,4 @@ results_goodfit["pstd"] = map(i->std(p_goodfit[:,i]), 1:np)
 # Gadfly.draw(Gadfly.PNG("scatter_plot_$(pnames[1])vs_$(pnames[2]).png", 6Gadfly.inch, 4Gadfly.inch), f)
 
 toc()
-# 42.93381083217778
+# 42.93381083217778 hours
