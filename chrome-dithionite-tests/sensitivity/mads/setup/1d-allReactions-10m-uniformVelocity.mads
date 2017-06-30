@@ -1,4 +1,4 @@
-Julia command: read_data.jl
+Julia command: read_data_spawn.jl
 Observations:
 - Cr6_Obs_t1: {target: 2.79785e-05, weight: 100.0, time: 1.00}
 - Cr6_Obs_t2: {target: 2.78347e-05, weight: 100.0, time: 8.00}
@@ -47,4 +47,4 @@ Parameters:
 Solution: external
 Templates:
 - tmp1: {tpl: 1d-allReactions-10m-uniformVelocity.in.tpl, write: 1d-allReactions-10m-uniformVelocity.in}
-Restart: false
+Restart: true
