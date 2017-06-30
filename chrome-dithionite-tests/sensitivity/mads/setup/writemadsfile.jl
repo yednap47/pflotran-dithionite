@@ -71,7 +71,7 @@ simbasename = "1d-allReactions-10m-uniformVelocity"
 plotresults = true # for plotting targets
 myvar = ["east CrO4-- [mol/d]"]
 mystd = 2.e-6 # standard deviation
-skipfactor = 10 # resolution of targets vs simulation output
+skipfactor = 7 # resolution of targets vs simulation output
 caltag = "Cr6_Obs"
 timeUnits = "d"
 

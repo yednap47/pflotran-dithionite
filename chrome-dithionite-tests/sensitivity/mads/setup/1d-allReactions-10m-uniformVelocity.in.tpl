@@ -49,30 +49,30 @@ CHEMISTRY
   REACTION_SANDBOX
     S2O4_DISP
       RATE_CONSTANT !k_s2o4_disp! # /s, Istok (1999), 0.13 /hr
-      EPS 1.d-50
+      EPS 1.d-30
     /
     S2O4_O2
       RATE_CONSTANT !k_s2o4_o2! # /s
-      EPS 1.d-50
+      EPS 1.d-30
     /
     S2O4_FE3
       RATE_CONSTANT !k_s2o4_fe3! # /s
       SSA 175 # m^2/g
       ROCK_DENSITY 1200.d0 # m^3/m^3_bulk
       FRACTION !fraction!
-      EPS 1.d-50
+      EPS 1.d-30
     /
     FE2_O2
       RATE_CONSTANT_SLOW !k_fe2_o2_slow! # /s
       RATE_CONSTANT_FAST !k_fe2_o2_fast! # /s
       ROCK_DENSITY 1200.d0 # kg/m^3_bulk
-      EPS 1.d-50
+      EPS 1.d-30
     /
     FE2_CR6
       RATE_CONSTANT_SLOW !k_fe2_cr6_slow! # /s
       RATE_CONSTANT_FAST !k_fe2_cr6_fast!  # /s
       ROCK_DENSITY 1200.d0 # kg/m^3_bulk
-      EPS 1.d-50
+      EPS 1.d-30
     /
   /
   MINERALS
@@ -180,16 +180,16 @@ END
 OUTPUT
 #  FORMAT HDF5
   VELOCITY_AT_CENTER
-  TIMES d 1.0 11.0 21.0 31.0 61.0 81.0 91.0 101.0 121.0 151.0 161.0 171.0 181.0 191.0 201.0 211.0 221.0 231.0 241.0 251.0 261.0 271.0 281.0 291.0 301.0 311.0 321.0 331.0 341.0 351.0 361.0
+  TIMES d 1.0 8.0 22.0 36.0 43.0 57.0 64.0 78.0 85.0 127.0 134.0 148.0 155.0 162.0 169.0 176.0 183.0 190.0 197.0 204.0 211.0
   PRINT_COLUMN_IDS
   MASS_BALANCE_FILE
-  TIMES d 1.0 11.0 21.0 31.0 61.0 81.0 91.0 101.0 121.0 151.0 161.0 171.0 181.0 191.0 201.0 211.0 221.0 231.0 241.0 251.0 261.0 271.0 281.0 291.0 301.0 311.0 321.0 331.0 341.0 351.0 361.0
+  TIMES d 1.0 8.0 22.0 36.0 43.0 57.0 64.0 78.0 85.0 127.0 134.0 148.0 155.0 162.0 169.0 176.0 183.0 190.0 197.0 204.0 211.0
   /
 END
 
 #=========================== times ============================================
 TIME
-  FINAL_TIME 365.d0 d
+  FINAL_TIME 215.d0 d
   INITIAL_TIMESTEP_SIZE 1.d-10 d 
   MAXIMUM_TIMESTEP_SIZE 1.d-1 d at 0.0 d
   MAXIMUM_TIMESTEP_SIZE 1.d0 d at 15.0 d
