@@ -78,6 +78,7 @@ function readdata(d)
         obskeys = Mads.getobskeys(md)
         if length(results) != length(obskeys)
             error("Number of simulated results does not match number of obskeys!!")
+            exit()
         end
         
         return results
