@@ -1,56 +1,46 @@
-Julia command: read_data.jl
+Julia command: read_data_spawn.jl
 Observations:
-- Cr6_Obs_t1: {target: 2.92472e-05, weight: 100.0, time: 1.00}
-- Cr6_Obs_t2: {target: 7.28764e-06, weight: 100.0, time: 11.00}
-- Cr6_Obs_t3: {target: 2.77039e-06, weight: 100.0, time: 21.00}
-- Cr6_Obs_t4: {target: 2.24798e-06, weight: 100.0, time: 31.00}
-- Cr6_Obs_t5: {target: 3.84845e-06, weight: 100.0, time: 61.00}
-- Cr6_Obs_t6: {target: 1.43321e-06, weight: 100.0, time: 81.00}
-- Cr6_Obs_t7: {target: 6.02265e-07, weight: 100.0, time: 91.00}
-- Cr6_Obs_t8: {target: 8.78382e-07, weight: 100.0, time: 101.00}
-- Cr6_Obs_t9: {target: 5.51279e-06, weight: 100.0, time: 121.00}
-- Cr6_Obs_t10: {target: 8.78680e-07, weight: 100.0, time: 151.00}
-- Cr6_Obs_t11: {target: 3.19466e-06, weight: 100.0, time: 161.00}
-- Cr6_Obs_t12: {target: 1.60440e-06, weight: 100.0, time: 171.00}
-- Cr6_Obs_t13: {target: 3.71820e-06, weight: 100.0, time: 181.00}
-- Cr6_Obs_t14: {target: 4.99337e-06, weight: 100.0, time: 191.00}
-- Cr6_Obs_t15: {target: 6.86930e-06, weight: 100.0, time: 201.00}
-- Cr6_Obs_t16: {target: 7.52937e-06, weight: 100.0, time: 211.00}
-- Cr6_Obs_t17: {target: 1.39623e-05, weight: 100.0, time: 221.00}
-- Cr6_Obs_t18: {target: 1.12262e-05, weight: 100.0, time: 231.00}
-- Cr6_Obs_t19: {target: 1.15530e-05, weight: 100.0, time: 241.00}
-- Cr6_Obs_t20: {target: 1.65478e-05, weight: 100.0, time: 251.00}
-- Cr6_Obs_t21: {target: 1.63227e-05, weight: 100.0, time: 261.00}
-- Cr6_Obs_t22: {target: 2.10291e-05, weight: 100.0, time: 271.00}
-- Cr6_Obs_t23: {target: 2.21368e-05, weight: 100.0, time: 281.00}
-- Cr6_Obs_t24: {target: 1.99173e-05, weight: 100.0, time: 291.00}
-- Cr6_Obs_t25: {target: 2.34795e-05, weight: 100.0, time: 301.00}
-- Cr6_Obs_t26: {target: 2.11485e-05, weight: 100.0, time: 311.00}
-- Cr6_Obs_t27: {target: 2.35300e-05, weight: 100.0, time: 321.00}
-- Cr6_Obs_t28: {target: 2.29706e-05, weight: 100.0, time: 331.00}
-- Cr6_Obs_t29: {target: 2.78568e-05, weight: 100.0, time: 341.00}
-- Cr6_Obs_t30: {target: 2.42808e-05, weight: 100.0, time: 351.00}
-- Cr6_Obs_t31: {target: 2.28018e-05, weight: 100.0, time: 361.00}
+- Cr6_Obs_t1: {target: 2.79785e-05, weight: 100.0, time: 1.00}
+- Cr6_Obs_t2: {target: 2.78347e-05, weight: 100.0, time: 8.00}
+- Cr6_Obs_t3: {target: 1.62510e-06, weight: 100.0, time: 22.00}
+- Cr6_Obs_t4: {target: 2.76671e-06, weight: 100.0, time: 36.00}
+- Cr6_Obs_t5: {target: 3.60053e-06, weight: 100.0, time: 43.00}
+- Cr6_Obs_t6: {target: 5.33235e-09, weight: 100.0, time: 57.00}
+- Cr6_Obs_t7: {target: 1.90784e-07, weight: 100.0, time: 64.00}
+- Cr6_Obs_t8: {target: 9.29918e-07, weight: 100.0, time: 78.00}
+- Cr6_Obs_t9: {target: 1.88841e-06, weight: 100.0, time: 85.00}
+- Cr6_Obs_t10: {target: 2.25364e-07, weight: 100.0, time: 127.00}
+- Cr6_Obs_t11: {target: 2.56749e-06, weight: 100.0, time: 134.00}
+- Cr6_Obs_t12: {target: 7.02142e-07, weight: 100.0, time: 148.00}
+- Cr6_Obs_t13: {target: 1.37010e-06, weight: 100.0, time: 155.00}
+- Cr6_Obs_t14: {target: 3.12056e-06, weight: 100.0, time: 162.00}
+- Cr6_Obs_t15: {target: 2.59609e-07, weight: 100.0, time: 169.00}
+- Cr6_Obs_t16: {target: 3.31366e-06, weight: 100.0, time: 176.00}
+- Cr6_Obs_t17: {target: 4.08501e-06, weight: 100.0, time: 183.00}
+- Cr6_Obs_t18: {target: 3.13687e-06, weight: 100.0, time: 190.00}
+- Cr6_Obs_t19: {target: 6.02009e-06, weight: 100.0, time: 197.00}
+- Cr6_Obs_t20: {target: 6.01373e-06, weight: 100.0, time: 204.00}
+- Cr6_Obs_t21: {target: 6.05088e-06, weight: 100.0, time: 211.00}
 Parameters:
-- log_k_s2o4_disp: {init: -4.4425, min: -4.9425, max: -3.9425, type: opt}
+- log_k_s2o4_disp: {init: -4.4425, min: -4.5425, max: -4.3425, type: opt}
 - k_s2o4_disp: {exp: "10^log_k_s2o4_disp"}
-- log_k_s2o4_o2: {init: 0.0000, min: -0.5000, max: 0.5000, type: opt}
+- log_k_s2o4_o2: {init: 0.0000, min: -0.1000, max: 0.1000, type: opt}
 - k_s2o4_o2: {exp: "10^log_k_s2o4_o2"}
-- log_k_s2o4_fe3: {init: -5.0000, min: -5.5000, max: -4.5000, type: opt}
+- log_k_s2o4_fe3: {init: -5.0000, min: -5.1000, max: -4.9000, type: opt}
 - k_s2o4_fe3: {exp: "10^log_k_s2o4_fe3"}
-- log_fraction: {init: -0.3010, min: -1.3010, max: 0.0000, type: opt}
+- log_fraction: {init: -0.3010, min: -0.4010, max: -0.2010, type: opt}
 - fraction: {exp: "10^log_fraction"}
-- log_k_fe2_o2_fast: {init: 1.0000, min: 0.5000, max: 1.5000, type: opt}
+- log_k_fe2_o2_fast: {init: 1.0000, min: 0.9000, max: 1.1000, type: opt}
 - k_fe2_o2_fast: {exp: "10^log_k_fe2_o2_fast"}
-- log_factor_k_fe2_o2_slow: {init: -2.0000, min: -2.5000, max: -1.5000, type: opt}
-- log_k_fe2_cr6_fast: {init: 1.0000, min: 0.5000, max: 1.5000, type: opt}
+- log_factor_k_fe2_o2_slow: {init: -2.0000, min: -2.1000, max: -1.9000, type: opt}
+- log_k_fe2_cr6_fast: {init: 1.0000, min: 0.9000, max: 1.1000, type: opt}
 - k_fe2_cr6_fast: {exp: "10^log_k_fe2_cr6_fast"}
-- log_factor_k_fe2_cr6_slow: {init: -2.0000, min: -2.5000, max: -1.5000, type: opt}
-- log_is2o4: {init: -1.0000, min: -1.5000, max: -0.5000, type: opt}
+- log_factor_k_fe2_cr6_slow: {init: -2.0000, min: -2.1000, max: -1.9000, type: opt}
+- log_is2o4: {init: -1.0000, min: -1.1000, max: -0.9000, type: opt}
 - is2o4: {exp: "10^log_is2o4"}
-- log_ifeoh3: {init: -2.4136, min: -2.9136, max: -1.9136, type: opt}
+- log_ifeoh3: {init: -2.4136, min: -2.5136, max: -2.3136, type: opt}
 - ifeoh3: {exp: "10^log_ifeoh3"}
-- log_q: {init: -0.8239, min: -1.3239, max: -0.3239, type: opt}
+- log_q: {init: -0.8239, min: -0.9239, max: -0.7239, type: opt}
 - q: {exp: "10^log_q"}
 - k_fe2_o2_slow: {exp: "10^log_k_fe2_o2_fast*10^log_factor_k_fe2_o2_slow"}
 - k_fe2_cr6_slow: {exp: "10^log_k_fe2_cr6_fast*10^log_factor_k_fe2_cr6_slow"}

@@ -55,7 +55,8 @@ coolnames =  [
               ]
 
 nstops = 3 # number of sensitivity runs
-mytime = 365
+mytime = 215
+timeunits = "d"
 MV = 33.1/(100)^3 # m^3/mol
 coord_name = "X"
 
@@ -132,7 +133,7 @@ for sensparam in sensparams
             obsresults = sachFun.readObsDataset(filename,myvar,dataframe=true)
             total_sboundfe2 = obsresults[Symbol("Global fast_Fe++")] + obsresults[Symbol("Global slow_Fe++")]
             sensresults_fe2 = append!(sensresults_fe2,[maximum(total_sboundfe2)])
-            sensresults_cr6 = append!(sensresults_cr6,-(obsresults[Symbol("east CrO4-- [mol]")][end]))
+            sensresults_cr6 = append!(sensresults_cr6,-(obsresults[Symbol("east CrO4-- [mol]")][mytime]))
         end
         results[sensparam]["max Fe(II)"] = sensresults_fe2
         results[sensparam]["tot Cr(VI)"] = sensresults_cr6
@@ -199,5 +200,5 @@ ax[2][:set_position]([box[:x0]-0.05, box[:y0]+0.035, box[:width] * 0.82, box[:he
 
 ax[2][:legend](loc=0,fontsize=mysize,loc=4, bbox_to_anchor=(1.7, 0.0))
 f[:canvas][:draw]() # Update the figure
-plt.savefig("results_full_$(rundir).png")
+plt.savefig("results_full_$(rundir)_$(mytime)$(timeunits).png")
 plt.close()
