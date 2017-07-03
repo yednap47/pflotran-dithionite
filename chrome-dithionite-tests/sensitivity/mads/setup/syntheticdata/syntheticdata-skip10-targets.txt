@@ -1,0 +1,16 @@
+- Cr6_Obs_t1: {target: 2.64122e-05, weight: 100.0, time: 1.00}
+- Cr6_Obs_t2: {target: 8.51713e-06, weight: 100.0, time: 11.00}
+- Cr6_Obs_t3: {target: 1.90564e-07, weight: 100.0, time: 41.00}
+- Cr6_Obs_t4: {target: 9.79581e-07, weight: 100.0, time: 81.00}
+- Cr6_Obs_t5: {target: 7.42429e-07, weight: 100.0, time: 91.00}
+- Cr6_Obs_t6: {target: 2.79881e-06, weight: 100.0, time: 111.00}
+- Cr6_Obs_t7: {target: 9.23098e-07, weight: 100.0, time: 121.00}
+- Cr6_Obs_t8: {target: 3.32053e-06, weight: 100.0, time: 131.00}
+- Cr6_Obs_t9: {target: 5.18729e-06, weight: 100.0, time: 141.00}
+- Cr6_Obs_t10: {target: 2.65826e-06, weight: 100.0, time: 151.00}
+- Cr6_Obs_t11: {target: 2.53930e-06, weight: 100.0, time: 161.00}
+- Cr6_Obs_t12: {target: 2.21904e-06, weight: 100.0, time: 171.00}
+- Cr6_Obs_t13: {target: 7.78738e-06, weight: 100.0, time: 181.00}
+- Cr6_Obs_t14: {target: 3.49148e-06, weight: 100.0, time: 191.00}
+- Cr6_Obs_t15: {target: 3.77083e-06, weight: 100.0, time: 201.00}
+- Cr6_Obs_t16: {target: 6.05654e-06, weight: 100.0, time: 211.00}

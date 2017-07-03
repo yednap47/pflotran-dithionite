@@ -18,7 +18,7 @@ END
 SUBSURFACE
 
 #=========================== useful tranport parameters ==================
-UNIFORM_VELOCITY 0.15 0.d0 0.d0 m/d
+UNIFORM_VELOCITY 1.50e-01 0.d0 0.d0 m/d
 
 #=========================== chemistry ========================================
 CHEMISTRY
@@ -48,29 +48,29 @@ CHEMISTRY
   /
   REACTION_SANDBOX
     S2O4_DISP
-      RATE_CONSTANT 3.61d-5 # /s, Istok (1999), 0.13 /hr
+      RATE_CONSTANT 3.61e-05 # /s, Istok (1999), 0.13 /hr
       EPS 1.d-50
     /
     S2O4_O2
-      RATE_CONSTANT 1.d0 # /s
+      RATE_CONSTANT 1.00e+00 # /s
       EPS 1.d-50
     /
     S2O4_FE3
-      RATE_CONSTANT 1.0d-5 # /s
+      RATE_CONSTANT 1.00e-05 # /s
       SSA 175 # m^2/g
       ROCK_DENSITY 1200.d0 # m^3/m^3_bulk
-      FRACTION 0.5
+      FRACTION 5.00e-01
       EPS 1.d-50
     /
     FE2_O2
-      RATE_CONSTANT_SLOW 1.d-1 # /s
-      RATE_CONSTANT_FAST 1.d1 # /s
+      RATE_CONSTANT_SLOW 1.00e-01 # /s
+      RATE_CONSTANT_FAST 1.00e+01 # /s
       ROCK_DENSITY 1200.d0 # kg/m^3_bulk
       EPS 1.d-50
     /
     FE2_CR6
-      RATE_CONSTANT_SLOW 1.d-1 # /s
-      RATE_CONSTANT_FAST 1.d1  # /s
+      RATE_CONSTANT_SLOW 1.00e-01 # /s
+      RATE_CONSTANT_FAST 1.00e+01  # /s
       ROCK_DENSITY 1200.d0 # kg/m^3_bulk
       EPS 1.d-50
     /
@@ -147,7 +147,7 @@ END
 
 #=========================== fluid properties =================================
 FLUID_PROPERTY
-  DIFFUSION_COEFFICIENT 1.d-9
+  DIFFUSION_COEFFICIENT 1.00e-09
 END
 
 #=========================== material properties ==============================
@@ -262,7 +262,7 @@ CONSTRAINT initial
     K+      1.00d-05
   /
   MINERALS
-    Fe(OH)3(s) 3.86d-3  1.d3 # 1% mass percent
+    Fe(OH)3(s) 3.86e-03  1.d3 # 1% mass percent
     Cr(OH)3(s) 1.d-20 1.d3
     Calcite    0.00999858 1.d3
   /
@@ -296,7 +296,7 @@ CONSTRAINT injectant
     H+     -0.4 T
     O2(aq)  2.84d-4 T
     CrO4--  1.d-20 T
-    S2O4--  1.d-1  T
+    S2O4--  1.00e-01 T
     S2O3--  1.d-20 T
     SO3--   1.d-20 T
     SO4--   1.d-20 T

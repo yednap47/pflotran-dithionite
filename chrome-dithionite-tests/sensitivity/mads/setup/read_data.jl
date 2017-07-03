@@ -2,26 +2,39 @@ using HDF5
 import sachFun
 
 function readdata(d)
+    
+    function runforabit(command, timelimit, pollinterval=1)
+        # kills terminal command if time limit is exceeded
+        # note, all times are in seconds
+        starttime = now()
+        process = spawn(command)
+        while !process_exited(process) && float(now() - starttime) / 1000 < timelimit
+            sleep(pollinterval)
+        end
+        if !process_exited(process)
+            error("Simulation failed")
+            kill(process)
+            return false
+        else
+            return true
+        end
+    end
+    
     function parseh5!(casetag::AbstractString, results)
         # User Data
 #        ncalibrationTargets = 14
         np = 8
+        maxruntime = 10 * 60 # seconds from minutes
+
         pfpath = "/lclscratch/sach/Programs/pflotran-dithionite-git/src/pflotran"
         htag = casetag * ".h5"
         masstag = casetag * "-mas.dat"
         otag = casetag * ".out"
         crtag = "Cr6_Obs_t"
 
-        run(`rm -f $htag`)
-        run(`rm -f $otag`)
-
         directive = "mpirun -np $(np) " * pfpath * "/pflotran -pflotranin " * casetag * ".in >barf.txt"
-        try
-            asdf = `bash -c "$directive"`
-            # @show asdf
-            run(asdf)
-        catch
-        end
+        asdf = `bash -c "$directive"`
+        runforabit(asdf, maxruntime)
 
         # # METHOD 1: USE THE H5 FILE
         # myvar = ["Total_CrO4-- [M]"]
