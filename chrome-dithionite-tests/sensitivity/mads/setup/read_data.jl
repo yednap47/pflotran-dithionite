@@ -12,7 +12,7 @@ function readdata(d)
             sleep(pollinterval)
         end
         if !process_exited(process)
-            error("Simulation failed")
+            warn("Simulation failed")
             kill(process)
             return false
         else
@@ -78,7 +78,6 @@ function readdata(d)
         obskeys = Mads.getobskeys(md)
         if length(results) != length(obskeys)
             error("Number of simulated results does not match number of obskeys!!")
-            exit()
         end
         
         return results
