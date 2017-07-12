@@ -24,7 +24,7 @@ coord_name = "X"
 # mytime = [0.1,0.2,0.3,0.4,0.5,0.6,0.7,0.8,0.9]
 mytime = [37.0,73.0,110.0,146.0,183.0,219.0,256.0,292.0,329.0]
 # mytime = [0.01,0.02,0.03,0.04,0.05,0.06,0.07,0.08]
-timeunits = "years"
+timeunits = "days"
 mysize = 11
 
 mylabel = ["$(time) $(timeunits)" for time in mytime]
