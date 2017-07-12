@@ -159,7 +159,7 @@ subroutine S2o4_fe3Read(this,input,option)
                            'CHEMISTRY,REACTION_SANDBOX,S2O4_FE3')
       case('FRACTION')
         call InputReadDouble(input,option,this%sitefrac)
-        call InputErrorMsg(input,option,'ROCK_DENSITY', &
+        call InputErrorMsg(input,option,'FRACTION', &
                            'CHEMISTRY,REACTION_SANDBOX,S2O4_FE3')
       case('EPS')
         call InputReadDouble(input,option,this%eps)
@@ -199,17 +199,20 @@ subroutine S2o4_fe3Setup(this,reaction,option)
 ! 9. Add code to initialize
   this%name_spec_s2o4 = 'S2O4--'
   this%name_spec_h    = 'H+'
-  this%name_spec_so3 = 'SO3--'
+  this%name_spec_so3  = 'SO3--'
   this%name_mnrl_fe3  = 'Fe(OH)3(s)'
   this%name_bound_fe2_slow  = 'slow_Fe++'
   this%name_bound_fe2_fast  = 'fast_Fe++'
   
+  ! Aqueous species
   this%id_spec_s2o4 = &
     GetPrimarySpeciesIDFromName(this%name_spec_s2o4,reaction,option)
   this%id_spec_h = &
       GetPrimarySpeciesIDFromName(this%name_spec_h,reaction,option)
   this%id_spec_so3 = &
       GetPrimarySpeciesIDFromName(this%name_spec_so3,reaction,option)
+
+  ! Mineral species
   this%id_mnrl_fe3 = &
     GetMineralIDFromName(this%name_mnrl_fe3,reaction%mineral,option)
 
@@ -254,7 +257,7 @@ subroutine S2o4_fe3React(this,Residual,Jacobian,compute_derivative, &
   PetscInt, parameter :: iphase = 1
   PetscReal :: L_water, FeII, FeIII, rate
   PetscReal :: vf_feoh3, mv_feoh3, mw_feoh3
-  PetscInt :: id_bound_fe2_fast_offset, id_bound_fe2_slow_offset
+  PetscInt :: id_bound_fe2_slow_offset, id_bound_fe2_fast_offset
 
   ! Info for Fe(oh)3(s) and bound_Fe++
   vf_feoh3 = rt_auxvar%mnrl_volfrac(this%id_mnrl_fe3) ! m^3/m^3_bulk

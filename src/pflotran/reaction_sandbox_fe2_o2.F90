@@ -149,11 +149,11 @@ subroutine Fe2_o2Read(this,input,option)
      case('ROCK_DENSITY')
        call InputReadDouble(input,option,this%rock_density)
        call InputErrorMsg(input,option,'ROCK_DENSITY', &
-                           'CHEMISTRY,REACTION_SANDBOX,S2O4_FE3')
+                           'CHEMISTRY,REACTION_SANDBOX,FE2_O2')
      case('EPS')
        call InputReadDouble(input,option,this%eps)
        call InputErrorMsg(input,option,'EPS', &
-                           'CHEMISTRY,REACTION_SANDBOX,S2O4_FE3')
+                           'CHEMISTRY,REACTION_SANDBOX,FE2_O2')
 ! 8. Inform the user if the keyword is not recognized
       case default
         call InputKeywordUnrecognized(word, &
@@ -176,7 +176,6 @@ subroutine Fe2_o2Setup(this,reaction,option)
 
   use Reaction_Aux_module, only : reaction_type, GetPrimarySpeciesIDFromName
   use Reaction_Immobile_Aux_module, only : GetImmobileSpeciesIDFromName
-  use Reaction_Mineral_Aux_module, only : GetMineralIDFromName
   use Option_module
 
   implicit none

@@ -35,7 +35,7 @@ module Reaction_Sandbox_S2o4_o2_class
     character(len=MAXWORDLENGTH) :: name_spec_so4 ! SO4--
     character(len=MAXWORDLENGTH) :: name_spec_h ! H+
     PetscInt :: id_spec_s2o4, id_spec_o2, id_spec_so3, id_spec_so4, id_spec_h
-    PetscReal :: rate_constant, monod_constant, eps
+    PetscReal :: rate_constant, eps
   contains
     procedure, public :: ReadInput => S2o4_o2Read
     procedure, public :: Setup => S2o4_o2Setup
@@ -76,7 +76,6 @@ function S2o4_o2Create()
   S2o4_o2Create%id_spec_so4 = 0
   S2o4_o2Create%id_spec_h = 0
   S2o4_o2Create%rate_constant = 0.d0
-  S2o4_o2Create%monod_constant = 0.d0
   S2o4_o2Create%eps = 0.d0
   nullify(S2o4_o2Create%next)
 
@@ -142,10 +141,6 @@ subroutine S2o4_o2Read(this,input,option)
         call InputReadDouble(input,option,this%rate_constant)
         call InputErrorMsg(input,option,'RATE_CONSTANT', &
                            'CHEMISTRY,REACTION_SANDBOX,S2O4_O2')
-      case('MONOD_CONSTANT')
-        call InputReadDouble(input,option,this%monod_constant)
-        call InputErrorMsg(input,option,'MONOD_CONSTANT', &
-                       'CHEMISTRY,REACTION_SANDBOX,S2O4_O2')
       case('EPS')
         call InputReadDouble(input,option,this%eps)
         call InputErrorMsg(input,option,'EPS', &
@@ -236,9 +231,6 @@ subroutine S2o4_o2React(this,Residual,Jacobian,compute_derivative, &
             material_auxvar%volume*1.d3 ! L_water from m^3_water
 
   ! mole/l-s
-  ! rate = this%rate_constant*rt_auxvar%pri_molal(this%id_spec_s2o4)**1.5 * &
-  !            (rt_auxvar%pri_molal(this%id_spec_s2o4)/(this%monod_constant+rt_auxvar%pri_molal(this%id_spec_s2o4)))
-
   ! rate = 0.0
   ! if (rt_auxvar%total(this%id_spec_o2,iphase)>1e-20) then
   !   rate = this%rate_constant*(rt_auxvar%pri_molal(this%id_spec_s2o4)+1.d-20)**1.5

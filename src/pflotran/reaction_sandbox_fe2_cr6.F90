@@ -30,11 +30,11 @@ module Reaction_Sandbox_Fe2_cr6_class
     extends(reaction_sandbox_base_type) :: reaction_sandbox_fe2_cr6_type
 ! 3. Add variables/arrays associated with new reaction.
     character(len=MAXWORDLENGTH) :: name_spec_h ! H+
-    character(len=MAXWORDLENGTH) :: name_spec_cr6 ! HCrO4-
+    character(len=MAXWORDLENGTH) :: name_spec_cr6 ! CrO4-
     character(len=MAXWORDLENGTH) :: name_spec_cr3 ! Cr+++
     character(len=MAXWORDLENGTH) :: name_spec_fe3 ! Fe+++
-    character(len=MAXWORDLENGTH) :: name_bound_fe2_slow ! bound_Fe++
-    character(len=MAXWORDLENGTH) :: name_bound_fe2_fast ! bound_Fe++
+    character(len=MAXWORDLENGTH) :: name_bound_fe2_slow ! bound_Fe++ SLOW
+    character(len=MAXWORDLENGTH) :: name_bound_fe2_fast ! bound_Fe++ FAST
     PetscInt :: id_spec_h, id_spec_cr6, id_spec_cr3, id_spec_fe3
     PetscInt :: id_bound_fe2_slow, id_bound_fe2_fast
     PetscReal :: rate_constant_slow, rate_constant_fast, rock_density, eps
@@ -154,11 +154,11 @@ subroutine Fe2_cr6Read(this,input,option)
      case('ROCK_DENSITY')
        call InputReadDouble(input,option,this%rock_density)
        call InputErrorMsg(input,option,'ROCK_DENSITY', &
-                           'CHEMISTRY,REACTION_SANDBOX,S2O4_FE3')
+                           'CHEMISTRY,REACTION_SANDBOX,FE2_CR6')
      case('EPS')
        call InputReadDouble(input,option,this%eps)
        call InputErrorMsg(input,option,'EPS', &
-                           'CHEMISTRY,REACTION_SANDBOX,S2O4_FE3')
+                           'CHEMISTRY,REACTION_SANDBOX,FE2_CR6')
 ! 8. Inform the user if the keyword is not recognized
       case default
         call InputKeywordUnrecognized(word, &
@@ -181,7 +181,6 @@ subroutine Fe2_cr6Setup(this,reaction,option)
 
   use Reaction_Aux_module, only : reaction_type, GetPrimarySpeciesIDFromName
   use Reaction_Immobile_Aux_module, only : GetImmobileSpeciesIDFromName
-  use Reaction_Mineral_Aux_module, only : GetMineralIDFromName
   use Option_module
 
   implicit none
