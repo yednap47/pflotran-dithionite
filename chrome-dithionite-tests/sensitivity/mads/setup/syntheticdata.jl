@@ -6,7 +6,7 @@ plt = PyPlot
 
 function writemadstargets(basedir::String, myvar::Array{String,1}, timeUnits::String; plotresults::Bool=false, h5::Bool=false)
     
-    obsdatafname = joinpath(basedir,"sensitivity","mads","setup","$(simbasename)-mas.dat")
+    obsdatafname = joinpath(basedir,"1d_parameterTests","$(simbasename)-mas.dat")
     if h5
         # put code for reading h5 file here
     else
@@ -68,7 +68,7 @@ targetsfname = "syntheticdata"
 # User info for making synthetic data
 myvar = ["east CrO4-- [mol/d]"]
 mystd = 2.e-6 # standard deviation
-skipfactor = 7 # resolution of targets vs simulation output
+skipfactor = 10 # resolution of targets vs simulation output
 caltag = "Cr6_Obs"
 timeUnits = "d"
 

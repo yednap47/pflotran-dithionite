@@ -48,30 +48,30 @@ CHEMISTRY
   REACTION_SANDBOX
     S2O4_DISP
       RATE_CONSTANT 3.61e-05 # /s, Istok (1999), 0.13 /hr
-      EPS 1.d-50
+      EPS 1.d-30
     /
     S2O4_O2
       RATE_CONSTANT 1.00e+00 # /s
-      EPS 1.d-50
+      EPS 1.d-30
     /
     S2O4_FE3
       RATE_CONSTANT 1.00e-05 # /s
       SSA 175 # m^2/g
       ROCK_DENSITY 1200.d0 # m^3/m^3_bulk
       FRACTION 5.00e-01
-      EPS 1.d-50
+      EPS 1.d-30
     /
     FE2_O2
       RATE_CONSTANT_SLOW 1.00e-01 # /s
       RATE_CONSTANT_FAST 1.00e+01 # /s
       ROCK_DENSITY 1200.d0 # kg/m^3_bulk
-      EPS 1.d-50
+      EPS 1.d-30
     /
     FE2_CR6
       RATE_CONSTANT_SLOW 1.00e-01 # /s
       RATE_CONSTANT_FAST 1.00e+01  # /s
       ROCK_DENSITY 1200.d0 # kg/m^3_bulk
-      EPS 1.d-50
+      EPS 1.d-30
     /
   /
   MINERALS

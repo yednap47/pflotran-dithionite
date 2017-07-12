@@ -34,7 +34,7 @@ sensparams = [
               "q",
               ]
 
-rundir =  "attempt2"
+rundir =  "attempt3"
 nstops = 3 # nstops below, nstops above base
 
 # Default parameters for writing MADS file

@@ -1,27 +1,36 @@
 Julia command: read_data.jl
 Observations:
-- Cr6_Obs_t1: {target: 2.95828e-05, weight: 100.0, time: 1.00}
-- Cr6_Obs_t2: {target: 3.06213e-05, weight: 100.0, time: 8.00}
-- Cr6_Obs_t3: {target: 3.57564e-06, weight: 100.0, time: 15.00}
-- Cr6_Obs_t4: {target: 3.65213e-06, weight: 100.0, time: 22.00}
-- Cr6_Obs_t5: {target: 7.02672e-07, weight: 100.0, time: 50.00}
-- Cr6_Obs_t6: {target: 2.24061e-06, weight: 100.0, time: 57.00}
-- Cr6_Obs_t7: {target: 5.25030e-07, weight: 100.0, time: 78.00}
-- Cr6_Obs_t8: {target: 1.36699e-07, weight: 100.0, time: 85.00}
-- Cr6_Obs_t9: {target: 1.58050e-06, weight: 100.0, time: 92.00}
-- Cr6_Obs_t10: {target: 6.44760e-07, weight: 100.0, time: 113.00}
-- Cr6_Obs_t11: {target: 9.50849e-07, weight: 100.0, time: 120.00}
-- Cr6_Obs_t12: {target: 1.35913e-06, weight: 100.0, time: 134.00}
-- Cr6_Obs_t13: {target: 5.40129e-06, weight: 100.0, time: 141.00}
-- Cr6_Obs_t14: {target: 3.55629e-06, weight: 100.0, time: 155.00}
-- Cr6_Obs_t15: {target: 6.30385e-07, weight: 100.0, time: 162.00}
-- Cr6_Obs_t16: {target: 2.00016e-06, weight: 100.0, time: 169.00}
-- Cr6_Obs_t17: {target: 6.40192e-06, weight: 100.0, time: 176.00}
-- Cr6_Obs_t18: {target: 3.65765e-06, weight: 100.0, time: 183.00}
-- Cr6_Obs_t19: {target: 5.76370e-06, weight: 100.0, time: 190.00}
-- Cr6_Obs_t20: {target: 8.99443e-06, weight: 100.0, time: 197.00}
-- Cr6_Obs_t21: {target: 7.74024e-06, weight: 100.0, time: 204.00}
-- Cr6_Obs_t22: {target: 5.89525e-06, weight: 100.0, time: 211.00}
+- Cr6_Obs_t1: {target: 3.05561e-05, weight: 100.0, time: 1.00}
+- Cr6_Obs_t2: {target: 4.39988e-06, weight: 100.0, time: 11.00}
+- Cr6_Obs_t3: {target: 1.33102e-06, weight: 100.0, time: 21.00}
+- Cr6_Obs_t4: {target: 3.27074e-06, weight: 100.0, time: 41.00}
+- Cr6_Obs_t5: {target: 1.95011e-06, weight: 100.0, time: 61.00}
+- Cr6_Obs_t6: {target: 6.54438e-07, weight: 100.0, time: 91.00}
+- Cr6_Obs_t7: {target: 3.65126e-06, weight: 100.0, time: 101.00}
+- Cr6_Obs_t8: {target: 1.15203e-06, weight: 100.0, time: 121.00}
+- Cr6_Obs_t9: {target: 2.99111e-07, weight: 100.0, time: 141.00}
+- Cr6_Obs_t10: {target: 1.78856e-07, weight: 100.0, time: 151.00}
+- Cr6_Obs_t11: {target: 4.96151e-06, weight: 100.0, time: 161.00}
+- Cr6_Obs_t12: {target: 3.93506e-06, weight: 100.0, time: 171.00}
+- Cr6_Obs_t13: {target: 3.90146e-06, weight: 100.0, time: 181.00}
+- Cr6_Obs_t14: {target: 3.67924e-06, weight: 100.0, time: 191.00}
+- Cr6_Obs_t15: {target: 7.92015e-06, weight: 100.0, time: 201.00}
+- Cr6_Obs_t16: {target: 9.04875e-06, weight: 100.0, time: 211.00}
+- Cr6_Obs_t17: {target: 1.22205e-05, weight: 100.0, time: 221.00}
+- Cr6_Obs_t18: {target: 1.06771e-05, weight: 100.0, time: 231.00}
+- Cr6_Obs_t19: {target: 9.90800e-06, weight: 100.0, time: 241.00}
+- Cr6_Obs_t20: {target: 1.33392e-05, weight: 100.0, time: 251.00}
+- Cr6_Obs_t21: {target: 1.60187e-05, weight: 100.0, time: 261.00}
+- Cr6_Obs_t22: {target: 1.89664e-05, weight: 100.0, time: 271.00}
+- Cr6_Obs_t23: {target: 2.34186e-05, weight: 100.0, time: 281.00}
+- Cr6_Obs_t24: {target: 2.60952e-05, weight: 100.0, time: 291.00}
+- Cr6_Obs_t25: {target: 2.40082e-05, weight: 100.0, time: 301.00}
+- Cr6_Obs_t26: {target: 2.51319e-05, weight: 100.0, time: 311.00}
+- Cr6_Obs_t27: {target: 2.46953e-05, weight: 100.0, time: 321.00}
+- Cr6_Obs_t28: {target: 2.64769e-05, weight: 100.0, time: 331.00}
+- Cr6_Obs_t29: {target: 2.68736e-05, weight: 100.0, time: 341.00}
+- Cr6_Obs_t30: {target: 2.56928e-05, weight: 100.0, time: 351.00}
+- Cr6_Obs_t31: {target: 2.88426e-05, weight: 100.0, time: 361.00}
 Parameters:
 - log_k_s2o4_disp: {init: -4.4425, min: -5.4425, max: -3.4425, type: opt}
 - k_s2o4_disp: {exp: "10^log_k_s2o4_disp"}

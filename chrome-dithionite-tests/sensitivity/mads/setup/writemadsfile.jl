@@ -8,7 +8,7 @@ import DataFrames
 # general info
 basedir = "/lclscratch/sach/Programs/pflotran-dithionite-git/chrome-dithionite-tests"
 simbasename = "1d-allReactions-10m-uniformVelocity"
-targetsbasename = "syntheticdata-skip7"
+targetsbasename = "syntheticdata-skip10"
 
 # Default parameters for writing MADS file
 paramfilename = "../../parameters.xlsx"
