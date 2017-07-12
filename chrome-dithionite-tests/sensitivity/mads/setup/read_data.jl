@@ -22,15 +22,17 @@ function readdata(d)
     
     function parseh5!(casetag::AbstractString, results)
         # User Data
-#        ncalibrationTargets = 14
         np = 8
         maxruntime = 10 * 60 # seconds from minutes
 
         pfpath = "/lclscratch/sach/Programs/pflotran-dithionite-git/src/pflotran"
-        htag = casetag * ".h5"
         masstag = casetag * "-mas.dat"
         otag = casetag * ".out"
         crtag = "Cr6_Obs_t"
+
+        # remove old files
+        run(`rm -f $masstag`)
+        run(`rm -f $otag`)
 
         directive = "mpirun -np $(np) " * pfpath * "/pflotran -pflotranin " * casetag * ".in >barf.txt"
         asdf = `bash -c "$directive"`
@@ -56,24 +58,6 @@ function readdata(d)
             results[crtag * "$(i)"] = targets[i]
         end
 
-        # ORIGINAL METHOD, NO OUTSIDE FUNCTIONS, ONLY WORKS FOR BATCH
-        # fid = h5open(htag,"r")
-        # h5dict = read(fid)
-        # close(fid)
-        # 
-        # keyarray = collect(keys(h5dict))
-        # timekeyarray = filter(key -> split(key)[1] == "Time:", keyarray)
-        # timearray = [parse(Float64,split(key)[2]) for key in timekeyarray]
-        # sta = sort(timearray)
-        # 
-        # keydict = Dict(zip(timearray,timekeyarray))
-        # @show timekeyarray pwd()
-        # try
-        #     for i = 1:ncalibrationTargets
-        #             results[crtag * "$i"] = h5dict[keydict[sta[i + 1]]]["Total_CrO4-- [M]"][1]
-        #     end
-        # end
-        
         # Check to make sure you have all of the observations
         obskeys = Mads.getobskeys(md)
         if length(results) != length(obskeys)
