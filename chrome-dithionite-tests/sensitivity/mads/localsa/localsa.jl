@@ -27,3 +27,4 @@ o = Mads.forward(md)
 Mads.plotmatches(md, o, r"Cr6_Obs", filename="plot-init-Cr6.png")
 
 toc()
+# 24.97757628906667 minutes

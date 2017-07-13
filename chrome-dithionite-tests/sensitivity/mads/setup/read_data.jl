@@ -3,27 +3,27 @@ import sachFun
 
 function readdata(d)
     
-    function runforabit(command, timelimit, pollinterval=1)
+    function runforabit(command, waittime=0, pollinterval=1)
         # kills terminal command if time limit is exceeded
         # note, all times are in seconds
         starttime = now()
-        process = spawn(command)
-        while !process_exited(process) && float(now() - starttime) / 1000 < timelimit
-            sleep(pollinterval)
-        end
-        if !process_exited(process)
-            warn("Simulation failed")
-            kill(process)
-            return false
+        cmdproc = spawn(command)
+        if waittime > 0
+            timedwait(() -> process_exited(cmdproc), waittime)
+            if process_running(cmdproc)
+                warn("Simulation failed on worker ??")
+                kill(cmdproc)
+                return false
+            end
         else
-            return true
+            wait(cmdproc)
         end
     end
     
     function parseh5!(casetag::AbstractString, results)
         # User Data
         np = 8
-        maxruntime = 10 * 60 # seconds from minutes
+        maxruntime = 2.0 * 60.0 * 60.0 # seconds from hours
 
         pfpath = "/lclscratch/sach/Programs/pflotran-dithionite-git/src/pflotran"
         masstag = casetag * "-mas.dat"
