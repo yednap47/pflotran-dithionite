@@ -1,5 +1,7 @@
 import(Mads)
 
+Mads.quietoff()
+
 Mads.setprocs(8+1)
 reload("Mads")
 
@@ -67,4 +69,8 @@ results_goodfit["pstd"] = map(i->std(p_goodfit[:,i]), 1:np)
 # Gadfly.draw(Gadfly.PNG("scatter_plot_$(pnames[1])vs_$(pnames[2]).png", 6Gadfly.inch, 4Gadfly.inch), f)
 
 toc()
-# 42.93381083217778 hours
+# Worst objective function estimate 6.690420747251522e-6
+# Best objective function estimate 9.981250784653637e-7
+# [0] calibrations failed
+# INFO: Histograms of the estimated model parameters
+# elapsed time: 155658.512479483 seconds

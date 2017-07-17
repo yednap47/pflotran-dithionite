@@ -26,3 +26,4 @@ cal = Mads.forward(md, d)
 Mads.plotmatches(md, cal, r"Cr6_Obs", filename="plot-cal-Cr6.png")
 
 toc()
+# elapased time: 1766.381471413 seconds
