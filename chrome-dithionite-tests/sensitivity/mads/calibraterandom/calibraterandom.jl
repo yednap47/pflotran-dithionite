@@ -1,5 +1,7 @@
 import(Mads)
 
+Mads.quietoff()
+
 Mads.setprocs(8+1)
 reload("Mads")
 
