@@ -67,7 +67,7 @@ function readdata(d)
         return results
     end
 
-    results = Dict{AbstractString,Any}()
+    results = DataStructures.OrderedDict{AbstractString,Any}()
     parseh5!("1d-allReactions-10m-uniformVelocity", results)
     return results
 end
