@@ -82,3 +82,10 @@ src/pflotran/pflotran_source_files.txt
 regression_tests/*
 tpls/*
 src/pflotran/unittests/*
+*.chk
+*.dat
+*.svg
+*.png
+*.h5
+*.dbg
+*.txt
