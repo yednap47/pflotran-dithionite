@@ -55,7 +55,7 @@ coolnames =  [
               ]
 
 nstops = 3 # number of sensitivity runs
-mytime = 200
+mytime = 365
 timeunits = "d"
 MV = 33.1/(100)^3 # m^3/mol
 coord_name = "X"
@@ -64,10 +64,6 @@ coord_name = "X"
 dx= vcat(0.01*ones(200),0.1*ones(40),0.2*ones(20))
 dy = 0.1
 dz = 0.1
-
-# For plotting
-mysize = 11
-linewidth = 2
 
 #------------------------------------------------------------------------------
 # Get parameter info from madsfile
@@ -143,7 +139,9 @@ end
 #------------------------------------------------------------------------------
 # Spider plots v2
 #------------------------------------------------------------------------------
-f, ax = plt.subplots(1,2,figsize=(10.0,4.5))
+mysize = 10
+linewidth = 1
+f, ax = plt.subplots(1,2,figsize=(6.5,2.75))
 majorFormatter = plt.matplotlib[:ticker][:FormatStrFormatter]("%0.2e")
 # mycmap = plt.get_cmap("hsv",length(sensparams)+1)
 mycmap = plt.get_cmap("Paired",length(sensparams)+1)
@@ -173,32 +171,35 @@ for sensparam in sensparams
         ax[1][:plot](results[sensparam]["sensvals"]/basevalue, results[sensparam]["tot Cr(VI)"], marker="x", color=mycmap(i), label=coolnames[i])
         ax[1][:set_xlim](minimum(results[sensparam]["sensvals"])/basevalue,maximum(results[sensparam]["sensvals"])/basevalue)
         ax[1][:yaxis][:set_major_formatter](majorFormatter)
-        ax[1][:set_title](L"\mathrm{(A)}")
+        ax[1][:set_title](L"\mathrm{(A)}",fontsize = mysize)
         ax[1][:set_xscale]("log")
         ax[1][:set_yscale]("log")
-        ax[1][:set_xlabel](L"\mathrm{Fraction\, of\, base\, value}")
-        ax[1][:set_ylabel](L"\mathrm{\Sigma\, Cr(VI),\, [mol]}")
+        ax[1][:set_xlabel](L"\mathrm{Fraction\, of\, base\, value}",fontsize = mysize)
+        ax[1][:set_ylabel](L"\mathrm{Cr(VI)\, [mol]}",fontsize = mysize)
         ax[1][:set_xlim](10.0^-1.0,10.0^1.0)
+        ax[1][:tick_params](labelsize=mysize)
         
         # maximum surface bound Fe(II)
         ax[2][:plot](results[sensparam]["sensvals"]/basevalue, results[sensparam]["max Fe(II)"], marker="x", color=mycmap(i), label=coolnames[i])
         ax[2][:set_xlim](minimum(results[sensparam]["sensvals"])/basevalue,maximum(results[sensparam]["sensvals"])/basevalue)
         ax[2][:yaxis][:set_major_formatter](majorFormatter)
-        ax[2][:set_title](L"\mathrm{(B)}")
+        ax[2][:set_title](L"\mathrm{(B)}",fontsize = mysize)
         ax[2][:set_xscale]("log")
         ax[2][:set_yscale]("log")
-        ax[2][:set_xlabel](L"\mathrm{Fraction\, of\, base\, value}")
-        ax[2][:set_ylabel](L"\mathrm{\equiv Fe(II)\, [mol]}")
+        ax[2][:set_xlabel](L"\mathrm{Fraction\, of\, base\, value}",fontsize = mysize)
+        ax[2][:set_ylabel](L"\mathrm{\equiv Fe(II)\, [mol]}",fontsize = mysize)
         ax[2][:set_xlim](10.0^-1.0,10.0^1.0)
+        ax[2][:set_ylim](10.0^-1.4,10.0^1.0)
+        ax[2][:tick_params](labelsize=mysize)
     end
 end
 box = ax[1][:get_position]()
-ax[1][:set_position]([box[:x0]-0.02, box[:y0]+0.035, box[:width] * 0.82, box[:height]])
+ax[1][:set_position]([box[:x0]-0.02, box[:y0]+0.09, box[:width] * 0.8, box[:height] * 0.9])
 
 box = ax[2][:get_position]()
-ax[2][:set_position]([box[:x0]-0.05, box[:y0]+0.035, box[:width] * 0.82, box[:height]])
+ax[2][:set_position]([box[:x0]-0.05, box[:y0]+0.09, box[:width] * 0.8, box[:height] * 0.9])
 
-ax[2][:legend](loc=0,fontsize=mysize,loc=4, bbox_to_anchor=(1.7, 0.0))
+ax[2][:legend](loc=0,fontsize=mysize-2,loc=2, bbox_to_anchor=(1.1, 1.03))
 f[:canvas][:draw]() # Update the figure
-plt.savefig("results_full_$(rundir)_$(mytime)$(timeunits).png")
+plt.savefig("results_full_$(rundir)_$(mytime)$(timeunits).png",dpi=100)
 plt.close()
