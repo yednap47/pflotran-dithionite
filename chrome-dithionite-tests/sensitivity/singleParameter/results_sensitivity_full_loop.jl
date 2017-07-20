@@ -139,13 +139,14 @@ end
 #------------------------------------------------------------------------------
 # Spider plots v2
 #------------------------------------------------------------------------------
-mysize = 10
+mysize = 9
 linewidth = 1
 f, ax = plt.subplots(1,2,figsize=(6.5,2.75))
 majorFormatter = plt.matplotlib[:ticker][:FormatStrFormatter]("%0.2e")
 # mycmap = plt.get_cmap("hsv",length(sensparams)+1)
 mycmap = plt.get_cmap("Paired",length(sensparams)+1)
 for sensparam in sensparams
+    if sensparam != "d"
     # find the index of sensparam in paramkeys to get base value in params_init
     i = find(x -> x == sensparam,paramkeys)[1]
     basevalue = 10^logparams_init[i]
@@ -192,6 +193,7 @@ for sensparam in sensparams
         ax[2][:set_ylim](10.0^-1.4,10.0^1.0)
         ax[2][:tick_params](labelsize=mysize)
     end
+    end
 end
 box = ax[1][:get_position]()
 ax[1][:set_position]([box[:x0]-0.02, box[:y0]+0.09, box[:width] * 0.8, box[:height] * 0.9])
@@ -199,7 +201,7 @@ ax[1][:set_position]([box[:x0]-0.02, box[:y0]+0.09, box[:width] * 0.8, box[:heig
 box = ax[2][:get_position]()
 ax[2][:set_position]([box[:x0]-0.05, box[:y0]+0.09, box[:width] * 0.8, box[:height] * 0.9])
 
-ax[2][:legend](loc=0,fontsize=mysize-2,loc=2, bbox_to_anchor=(1.1, 1.03))
+ax[2][:legend](loc=0,fontsize=mysize-2,loc=2, bbox_to_anchor=(1.1, 1.03), frameon = false)
 f[:canvas][:draw]() # Update the figure
 plt.savefig("results_full_$(rundir)_$(mytime)$(timeunits).png",dpi=100)
 plt.close()
