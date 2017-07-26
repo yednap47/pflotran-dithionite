@@ -1,8 +1,7 @@
-# Id: initial_calcite_simpleSpecies.in, Mon 17 Apr 2017 06:19:10 PM MDT pandeys #
+# Id: calcite_injectant_check.in, Mon 17 Apr 2017 06:19:10 PM MDT pandeys #
 # Created by Sachin Pandey, LANL
-# Description: Equilibrate synthetic groundwater with calcite.
-#   - start with output from calcite.in to constrain chemistry
-#   - check to see if you get same solution as calcite.in
+# Description: Equilibrate injectant (clean water + buffer + dithionite)
+#   - Problem: Where does the total HCO3- go??
 #------------------------------------------------------------------
 SIMULATION
   SIMULATION_TYPE SUBSURFACE
@@ -21,7 +20,6 @@ SUBSURFACE
 #=========================== chemistry ========================================
 CHEMISTRY
   PRIMARY_SPECIES
-    A(aq)
     H+
     O2(aq)
     CrO4--
@@ -34,33 +32,14 @@ CHEMISTRY
     HCO3-
     Ca++
     K+
+    Na+
   /
   SECONDARY_SPECIES
     OH-
     CO3--
     CO2(aq)
   /
-  IMMOBILE_SPECIES
-    slow_Fe++
-    fast_Fe++
-  /
-  MINERALS
-    Fe(OH)3(s)
-    Cr(OH)3(s)
-    Calcite
-  /
-  MINERAL_KINETICS
-    Fe(OH)3(s)
-      RATE_CONSTANT 1.d-3 mol/m^2-sec
-    /
-    Cr(OH)3(s)
-      RATE_CONSTANT 1.d-3 mol/m^2-sec
-    /
-    Calcite
-      RATE_CONSTANT 1.d-3 mol/m^2-sec
-    /
-  /
-  DATABASE ../../chromium_dithionite_2017.dat
+  DATABASE /lclscratch/sach/Programs/pflotran-dithionite/chrome-dithionite-tests/chromium_dithionite_2017.dat
   ACTIVITY_COEFFICIENTS TIMESTEP
   LOG_FORMULATION
   OUTPUT
@@ -133,7 +112,7 @@ END
 
 #=========================== output options ===================================
 OUTPUT
-  PERIODIC TIME 10.d0 d
+  PERIODIC TIME 100.d0 d
   PERIODIC_OBSERVATION TIME 1.d0 d
   PRINT_COLUMN_IDS
 END
@@ -173,35 +152,26 @@ END
 TRANSPORT_CONDITION initial
   TYPE dirichlet
   CONSTRAINT_LIST
-    0.d0 initial
+    0.d0 injectant
   /
 END
 
 #=========================== constraints ======================================
-CONSTRAINT initial
+CONSTRAINT injectant
   CONCENTRATIONS
-    A(aq)   1.d-20 T
-    H+      -0.00011723 T
+    H+      -0.384966 T
     O2(aq)  2.84d-4 T
-    CrO4--  1.92d-5 T # 1000 ppb
-    S2O4--  1.d-20 T
+    CrO4--  1.d-20 T
+    S2O4--  1.d-1 T
     S2O3--  1.d-20 T
     SO3--   1.d-20 T
     SO4--   1.d-20 T
-    Fe+++   5.65094e-27 T
-    Cr+++   2.24813e-18 T
-    HCO3-   0.000117229 T
-    Ca++    0.000117229 T
-    K+      1.00d-05
-  /
-  MINERALS
-    Fe(OH)3(s) 3.86d-3  1.d3 # 1% mass percent
-    Cr(OH)3(s) 6.76011e-12 1.d3
-    Calcite    0.00999858 1.d3
-  /
-  IMMOBILE
-    slow_Fe++ 1.0d-20
-    fast_Fe++ 1.0d-20
+    Fe+++   1.d-20 T
+    Cr+++   1.d-20 T
+    K+      0.4d0 T
+    Na+     1.d-1 T
+    HCO3-   0.38495 T
+    Ca++    1.d-20 T
   /
 END
 

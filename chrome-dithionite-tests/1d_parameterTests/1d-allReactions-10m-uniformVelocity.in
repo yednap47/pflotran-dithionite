@@ -22,7 +22,6 @@ UNIFORM_VELOCITY 1.50e-01 0.d0 0.d0 m/d
 #=========================== chemistry ========================================
 CHEMISTRY
   PRIMARY_SPECIES
-    A(aq)
     H+
     O2(aq)
     CrO4--
@@ -35,6 +34,7 @@ CHEMISTRY
     HCO3-
     Ca++
     K+
+    Na+
   /
   SECONDARY_SPECIES
     OH-
@@ -90,7 +90,7 @@ CHEMISTRY
       RATE_CONSTANT 1.d-5 mol/m^2-sec
     /
   /
-  DATABASE /lclscratch/sach/Programs/pflotran-dithionite-git/chrome-dithionite-tests/chromium_dithionite_2017.dat
+  DATABASE /lclscratch/sach/Programs/pflotran-dithionite/chrome-dithionite-tests/chromium_dithionite_2017.dat
   ACTIVITY_COEFFICIENTS TIMESTEP
   LOG_FORMULATION
   OUTPUT
@@ -248,7 +248,6 @@ END
 #=========================== constraints ======================================^M
 CONSTRAINT initial
   CONCENTRATIONS
-    A(aq)   1.d-20 T
     H+      -0.00011723 T
     O2(aq)  2.84d-4 T
     CrO4--  1.92d-5 T # 1000 ppb
@@ -258,12 +257,13 @@ CONSTRAINT initial
     SO4--   1.d-20 T
     Fe+++   1.d-20 T
     Cr+++   1.d-20 T
+    K+      1.d-20 T
+    Na+     1.d-20 T
     HCO3-   0.000117229 T
     Ca++    0.000117229 T
-    K+      1.00d-05
   /
   MINERALS
-    Fe(OH)3(s) 3.86e-03  1.d3 # 1% mass percent
+    Fe(OH)3(s) 3.86d-3 1.d3 # 1% mass percent
     Cr(OH)3(s) 1.d-20 1.d3
     Calcite    0.00999858 1.d3
   /
@@ -275,7 +275,6 @@ END
 
 CONSTRAINT inlet
   CONCENTRATIONS
-    A(aq)   1.d-20 T
     H+      -0.00011723 T
     O2(aq)  2.84d-4 T
     CrO4--  1.92d-5 T # 1000 ppb
@@ -285,27 +284,28 @@ CONSTRAINT inlet
     SO4--   1.d-20 T
     Fe+++   1.d-20 T
     Cr+++   1.d-20 T
+    K+      1.d-20 T
+    Na+     1.d-20 T
     HCO3-   0.000117229 T
     Ca++    0.000117229 T
-    K+      1.00d-05
   /
 END
 
 CONSTRAINT injectant
   CONCENTRATIONS
-    A(aq)   1.d-1 T
     H+     -0.4 T
     O2(aq)  2.84d-4 T
     CrO4--  1.d-20 T
-    S2O4--  1.00e-01 T
+    S2O4--  1.d-1 T
     S2O3--  1.d-20 T
     SO3--   1.d-20 T
     SO4--   1.d-20 T
     Fe+++   1.d-20 T
     Cr+++   1.d-20 T
-    HCO3-   0.4 T
+    K+      0.4d0 T
+    Na+     1.d-1 T
+    HCO3-   0.4d0 T
     Ca++    1.d-20 T
-    K+      0.4 T
   /
 END
 

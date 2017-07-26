@@ -20,7 +20,6 @@ SUBSURFACE
 #=========================== chemistry ========================================
 CHEMISTRY
   PRIMARY_SPECIES
-    A(aq)
     H+
     O2(aq)
     CrO4--
@@ -33,6 +32,7 @@ CHEMISTRY
     HCO3-
     Ca++
     K+
+    Na+
   /
   SECONDARY_SPECIES
     OH-
@@ -59,7 +59,7 @@ CHEMISTRY
       RATE_CONSTANT 1.d-3 mol/m^2-sec
     /
   /
-  DATABASE ../../chromium_dithionite_2017.dat
+  DATABASE /lclscratch/sach/Programs/pflotran-dithionite/chrome-dithionite-tests/chromium_dithionite_2017.dat
   ACTIVITY_COEFFICIENTS TIMESTEP
   LOG_FORMULATION
   OUTPUT
@@ -179,7 +179,6 @@ END
 #=========================== constraints ======================================
 CONSTRAINT initial
   CONCENTRATIONS
-    A(aq)   1.d-20 T
     H+      7.0 P
     O2(aq)  2.84d-4 T
     CrO4--  1.92d-5 T # 1000 ppb
@@ -189,12 +188,13 @@ CONSTRAINT initial
     SO4--   1.d-20 T
     Fe+++   1.d-20 T
     Cr+++   1.d-20 T
-    HCO3-   1.0d-20 T
-    Ca++    1.0d-20 T
-    K+      1.00d-05
+    K+      1.d-20 T
+    Na+     1.d-20 T
+    HCO3-   1.d-20 T
+    Ca++    1.d-20 T
   /
   MINERALS
-    Fe(OH)3(s) 3.86d-3  1.d3 # 1% mass percent
+    Fe(OH)3(s) 3.86d-3 1.d3 # 1% mass percent
     Cr(OH)3(s) 1.d-20 1.d3
     Calcite    0.01 1.d3
   /
