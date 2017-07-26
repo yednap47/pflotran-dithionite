@@ -303,7 +303,7 @@ CONSTRAINT injectant
     Fe+++   1.d-20 T
     Cr+++   1.d-20 T
     K+      0.4d0 T
-    Na+     1.d-1 T
+    Na+     2.d-1 T
     HCO3-   0.4d0 T
     Ca++    1.d-20 T
   /

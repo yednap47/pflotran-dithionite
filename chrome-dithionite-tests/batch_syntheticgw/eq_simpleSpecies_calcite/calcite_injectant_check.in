@@ -159,7 +159,7 @@ END
 #=========================== constraints ======================================
 CONSTRAINT injectant
   CONCENTRATIONS
-    H+      -0.384966 T
+    H+      -0.38743 T
     O2(aq)  2.84d-4 T
     CrO4--  1.d-20 T
     S2O4--  1.d-1 T
@@ -169,8 +169,8 @@ CONSTRAINT injectant
     Fe+++   1.d-20 T
     Cr+++   1.d-20 T
     K+      0.4d0 T
-    Na+     1.d-1 T
-    HCO3-   0.38495 T
+    Na+     2.d-1 T
+    HCO3-   0.387406 T
     Ca++    1.d-20 T
   /
 END
