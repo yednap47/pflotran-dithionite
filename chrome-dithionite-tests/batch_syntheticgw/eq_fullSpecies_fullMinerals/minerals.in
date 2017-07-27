@@ -1,0 +1,316 @@
+# Id: calcite.in, Mon 17 Apr 2017 06:19:10 PM MDT pandeys #
+# Created by Sachin Pandey, LANL
+# Description: Equilibrate synthetic groundwater with calcite.
+#   - start with pH 7, see where it goes from there
+#   - include secondary species
+#------------------------------------------------------------------
+SIMULATION
+  SIMULATION_TYPE SUBSURFACE
+  PROCESS_MODELS
+    SUBSURFACE_FLOW flow
+      MODE RICHARDS
+    /
+    SUBSURFACE_TRANSPORT transport
+      GLOBAL_IMPLICIT
+    /
+  /
+END
+
+SUBSURFACE
+
+#=========================== chemistry ========================================
+CHEMISTRY
+  PRIMARY_SPECIES
+    H+
+    O2(aq)
+    CrO4--
+    S2O4--
+    S2O3--
+    SO3--
+    SO4--
+    Fe++
+    Fe+++
+    Cr+++
+    HCO3-
+    Ca++
+    K+
+    Na+
+    Cl-
+    Mg++
+    SiO2(aq)
+    Al+++
+  /
+  SECONDARY_SPECIES
+    Al(OH)2+
+    Al(SO4)2-
+    Al(OH)4-
+    Al(OH)3(aq)
+    AlOH++
+    AlSO4+
+    CO2(aq)
+    CO3--
+    CaCO3(aq)
+    CaCl+
+    CaCl2(aq)
+    CaHCO3+
+    CaOH+
+    CaSO4(aq)
+    Cr(OH)2+
+    Cr2O7--
+    CrOH++
+    Fe(OH)2(aq)
+    Fe(OH)2+
+    Fe(OH)3(aq)
+    Fe(OH)3-
+    Fe(OH)4-
+    Fe(OH)4--
+    Fe(SO4)2-
+    Fe2(OH)2++++
+    Fe3(OH)4(5+)
+    FeCO3(aq)
+    FeCO3+
+    FeCl+
+    FeCl++
+    FeCl2(aq)
+    FeCl2+
+#    FeCl4-
+    FeCl4--
+    FeHCO3+
+    FeOH+
+    FeOH++
+    FeSO4(aq)
+    FeSO4+
+    H2SO3(aq)
+    H2SO4(aq)
+    H2SiO4--
+    HCl(aq)
+    HCrO4-
+    HSO3-
+    HSO4-
+    HSiO3-
+    H3SiO4-
+    KCl(aq)
+    KHSO4(aq)
+    KOH(aq)
+    KSO4-
+    Mg4(OH)4++++
+    MgCO3(aq)
+    MgCl+
+    MgHCO3+
+    MgSO4(aq)
+    NaAlO2(aq)
+    NaCO3-
+    NaCl(aq)
+    NaHCO3(aq)
+    NaHSiO3(aq)
+    NaOH(aq)
+    NaSO4-
+    OH-
+    Cr(OH)3(aq)
+    Cr(OH)4-
+    MgOH+
+  /
+  IMMOBILE_SPECIES
+    slow_Fe++
+    fast_Fe++
+  /
+  MINERALS
+    Fe(OH)3(s)
+    Cr(OH)3(s)
+    Calcite
+    Siderite
+    Dolomite
+    Anhydrite
+    K-Feldspar
+  /
+  MINERAL_KINETICS
+    Fe(OH)3(s)
+      RATE_CONSTANT 1.d-3 mol/m^2-sec
+    /
+    Cr(OH)3(s)
+      RATE_CONSTANT 1.d-3 mol/m^2-sec
+    /
+    Calcite
+      RATE_CONSTANT 1.d-3 mol/m^2-sec
+    /
+    Siderite
+      RATE_CONSTANT 1.d-3 mol/m^2-sec
+    /
+    Dolomite
+      RATE_CONSTANT 1.d-3 mol/m^2-sec
+    /
+    Anhydrite
+      RATE_CONSTANT 1.d-3 mol/m^2-sec
+    /
+    K-Feldspar
+      RATE_CONSTANT 1.d-3 mol/m^2-sec
+    /
+  /
+  DATABASE ../../chromium_dithionite_2017_v2.dat
+  ACTIVITY_COEFFICIENTS TIMESTEP
+  LOG_FORMULATION
+  OUTPUT
+    ALL
+    FREE_ION
+    TOTAL
+    SECONDARY_SPECIES
+    PH
+  /
+END
+
+#=========================== solver options ===================================
+skip
+TIMESTEPPER
+  MAX_TS_CUTS 15
+  MAX_STEPS 10000
+END
+noskip
+
+LINEAR_SOLVER FLOW
+  SOLVER DIRECT
+  RTOL 1.d-8
+END
+
+LINEAR_SOLVER TRANSPORT
+  SOLVER DIRECT
+  RTOL 1.d-8
+END
+
+#=========================== discretization ===================================
+GRID
+  TYPE structured
+  ORIGIN 0.d0 0.d0 0.d0
+  NXYZ 1 1 1
+  BOUNDS
+    0.d0 0.d0 0.d0
+    1.d0 1.d0 1.d0
+  /
+END
+
+#=========================== fluid properties =================================
+FLUID_PROPERTY
+  DIFFUSION_COEFFICIENT 1.d-9
+END
+
+#=========================== material properties ==============================
+MATERIAL_PROPERTY saprolite
+  ID 1
+  POROSITY 3.28d-1
+  TORTUOSITY 1.d0
+  PERMEABILITY
+    PERM_ISO 1.d-12
+  /
+  CHARACTERISTIC_CURVES sf_saprolite
+END
+
+#=========================== saturation functions =============================
+! note: no need to specify phase as Richards is soley water phase
+CHARACTERISTIC_CURVES sf_saprolite
+  SATURATION_FUNCTION VAN_GENUCHTEN
+    M 8.5714d-01
+    ALPHA 7.6825e-05
+    LIQUID_RESIDUAL_SATURATION 1.5d-1
+  /
+  PERMEABILITY_FUNCTION MUALEM_VG_LIQ
+    M 8.5714d-01
+    LIQUID_RESIDUAL_SATURATION 1.5d-1
+  /
+END
+
+#=========================== output options ===================================
+OUTPUT
+  PERIODIC TIME 10.d0 d
+  PERIODIC_OBSERVATION TIME 1.d0 d
+  PRINT_COLUMN_IDS
+END
+
+#=========================== times ============================================
+TIME
+  FINAL_TIME 100.d0 d
+  INITIAL_TIMESTEP_SIZE 1.d-10 d
+  MAXIMUM_TIMESTEP_SIZE 1.d0 d
+END
+
+#=========================== regions ==========================================
+REGION all
+  COORDINATES
+    0.d0 0.d0 0.d0
+    1.d0 1.d0 1.d0
+  /
+END
+
+REGION obs
+  BLOCK 1 1 1 1 1 1
+END
+
+OBSERVATION obs
+  REGION obs
+END
+
+#=========================== flow conditions ==================================
+FLOW_CONDITION initial_pressure
+  TYPE
+    PRESSURE dirichlet  ! type is dirichlet for pressure
+  /                                       !   (constant pressure [Pa])
+    PRESSURE 1.0132e+05   ! saturated
+END
+
+#=========================== transport conditions =============================
+TRANSPORT_CONDITION initial
+  TYPE dirichlet
+  CONSTRAINT_LIST
+    0.d0 initial
+  /
+END
+
+#=========================== constraints ======================================
+CONSTRAINT initial
+  CONCENTRATIONS
+    H+       6.5 P
+    O2(aq)   2.84d-4 T
+    CrO4--   1.92d-5 T # 1000 ppb Cr(VI)
+    S2O4--   1.d-20 T
+    S2O3--   1.d-20 T
+    SO3--    1.d-20 T
+    SO4--    1.d-20 T
+    Fe++     1.d-20 T
+    Fe+++    1.d-20 T
+    Cr+++    1.d-20 T
+    HCO3-    1.d-20 T
+    Ca++     1.d-20 T
+    K+       1.d-20 T
+    Na+      1.d-20 T
+    Cl-      1.d-20 T
+    Mg++     1.d-20 T
+    SiO2(aq) 1.d-20 T
+    Al+++    1.d-20 T
+  /
+  MINERALS
+    Fe(OH)3(s) 3.86e-03 1.0e+03
+    Cr(OH)3(s) 1.00e-20 1.0e+03
+    Calcite 4.43e-03 1.0e+03
+    Siderite 3.04e-03 1.0e+03
+    Dolomite 4.19e-03 1.0e+03
+    Anhydrite 4.05e-03 1.0e+03
+    K-Feldspar 4.69e-03 1.0e+03
+  /
+  IMMOBILE
+    slow_Fe++ 1.00d-20
+    fast_Fe++ 1.00d-20
+  /
+END
+
+#=========================== condition couplers ===============================
+INITIAL_CONDITION
+  FLOW_CONDITION initial_pressure
+  TRANSPORT_CONDITION initial
+  REGION all
+END
+
+#=========================== condition couplers ===============================
+STRATA
+  REGION all
+  MATERIAL saprolite
+END
+
+END_SUBSURFACE
