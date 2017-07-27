@@ -36,4 +36,7 @@ ph = conc2[end,3]
 results = df.DataFrame(name = chemnames, conc = conc[end,2:end], charge = charges)
 sort!(results, cols = [order(:conc)],rev=true)
 df.writetable("$(split(fname,"-obs-")[1]).csv",results)
-cbe
+
+println("Charge balance error = $(cbe)%")
+println("Ionic strength = $(I)")
+println("pH = $(ph)")
