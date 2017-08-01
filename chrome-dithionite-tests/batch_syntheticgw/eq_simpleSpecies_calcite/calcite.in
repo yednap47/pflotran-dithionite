@@ -64,9 +64,9 @@ CHEMISTRY
   LOG_FORMULATION
   OUTPUT
     ALL
-#    FREE_ION
+    FREE_ION
     TOTAL
-#    SECONDARY_SPECIES
+    SECONDARY_SPECIES
     PH
   /
 END
@@ -194,9 +194,9 @@ CONSTRAINT initial
     Ca++    1.d-20 T
   /
   MINERALS
-    Fe(OH)3(s) 3.86d-3 1.d3 # 1% mass percent
-    Cr(OH)3(s) 1.d-20 1.d3
-    Calcite    0.01 1.d3
+    Fe(OH)3(s) 0.00e+00 1.0e+03
+    Cr(OH)3(s) 0.00e+00 1.0e+03
+    Calcite 2.21e-02 1.0e+03
   /
   IMMOBILE
     slow_Fe++ 1.0d-20

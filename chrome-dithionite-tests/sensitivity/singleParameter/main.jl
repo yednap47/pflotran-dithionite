@@ -30,30 +30,29 @@ sensparams = [
               "factor_k_fe2_cr6_slow",
               "is2o4",
               "ifeoh3",
-              "d",
               "q",
               ]
 
-rundir =  "attempt3"
+rundir =  "attempt1"
 nstops = 3 # nstops below, nstops above base
 
 # Default parameters for writing MADS file
 fname = "../parameters.xlsx"
-sheetname = "mads_tightened"
+sheetname = "mads_efast"
 jcommand = "read_data.jl"
 soltype = "external"
 simbasename = "1d-allReactions-10m-uniformVelocity"
 startover = "false"
 
 # pflotran information
-basedir = "/lclscratch/sach/Programs/pflotran-dithionite-git/chrome-dithionite-tests/sensitivity/singleParameter"
-pfle = "/lclscratch/sach/Programs/pflotran-dithionite-git/src/pflotran/pflotran"
+basedir = "/lclscratch/sach/Programs/pflotran-dithionite/chrome-dithionite-tests/sensitivity/singleParameter"
+pfle = "/lclscratch/sach/Programs/pflotran-dithionite/src/pflotran/pflotran"
 np = 8
 maxruntime = 15 * 60 # seconds from minutes
 
 # write the mads file
 f = xlr.openxl(fname)
-paraminfo = xlr.readxl(fname, "$(sheetname)!A2:D13")
+paraminfo = xlr.readxl(fname, "$(sheetname)!A2:D12")
 
 # make run directory
 if !isdir(joinpath(basedir,rundir))
@@ -143,7 +142,6 @@ for sensparam in sensparams
             paramarray[iparamloc,i] = sensvals[i]
         end
     end
-#    @show paramarray
 
     # now lets make the inputfiles
     if !isdir(joinpath(basedir,rundir,sensparam))
@@ -155,7 +153,8 @@ for sensparam in sensparams
             mkdir(joinpath(basedir,rundir,sensparam,"run$i"))
         end
         parameters = Dict(zip(paramkeys_act, paramarray[:,i]))
-        templatefilename = "../templateFiles/$simbasename.in.tpl"
+        parameters["ina"]=2*parameters["is2o4"] # Manually make a parameter, ina = 2*is2o4
+        templatefilename = "$simbasename.in.tpl"
         outputfilename = joinpath(basedir,rundir,sensparam,"run$i/$simbasename.in")
         Mads.writeparametersviatemplate(parameters, templatefilename, outputfilename)
         cd(joinpath(basedir,rundir,sensparam,"run$i"))

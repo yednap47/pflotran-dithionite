@@ -23,7 +23,6 @@ UNIFORM_VELOCITY !q! 0.d0 0.d0 m/d
 #=========================== chemistry ========================================
 CHEMISTRY
   PRIMARY_SPECIES
-    A(aq)
     H+
     O2(aq)
     CrO4--
@@ -36,6 +35,7 @@ CHEMISTRY
     HCO3-
     Ca++
     K+
+    Na+
   /
   SECONDARY_SPECIES
     OH-
@@ -49,30 +49,30 @@ CHEMISTRY
   REACTION_SANDBOX
     S2O4_DISP
       RATE_CONSTANT !k_s2o4_disp! # /s, Istok (1999), 0.13 /hr
-      EPS 1.d-50
+      EPS 1.d-30
     /
     S2O4_O2
       RATE_CONSTANT !k_s2o4_o2! # /s
-      EPS 1.d-50
+      EPS 1.d-30
     /
     S2O4_FE3
       RATE_CONSTANT !k_s2o4_fe3! # /s
       SSA 175 # m^2/g
       ROCK_DENSITY 1200.d0 # m^3/m^3_bulk
       FRACTION !fraction!
-      EPS 1.d-50
+      EPS 1.d-30
     /
     FE2_O2
       RATE_CONSTANT_SLOW !k_fe2_o2_slow! # /s
       RATE_CONSTANT_FAST !k_fe2_o2_fast! # /s
       ROCK_DENSITY 1200.d0 # kg/m^3_bulk
-      EPS 1.d-50
+      EPS 1.d-30
     /
     FE2_CR6
       RATE_CONSTANT_SLOW !k_fe2_cr6_slow! # /s
       RATE_CONSTANT_FAST !k_fe2_cr6_fast!  # /s
       ROCK_DENSITY 1200.d0 # kg/m^3_bulk
-      EPS 1.d-50
+      EPS 1.d-30
     /
   /
   MINERALS
@@ -91,15 +91,15 @@ CHEMISTRY
       RATE_CONSTANT 1.d-5 mol/m^2-sec
     /
   /
-  DATABASE /lclscratch/sach/Programs/pflotran-dithionite-git/chrome-dithionite-tests/chromium_dithionite_2017.dat
+  DATABASE /lclscratch/sach/Programs/pflotran-dithionite/chrome-dithionite-tests/chromium_dithionite_2017.dat
   ACTIVITY_COEFFICIENTS TIMESTEP
   LOG_FORMULATION
   OUTPUT
     ALL
+    FREE_ION
     TOTAL
+    SECONDARY_SPECIES
     PH
-#    FREE_ION
-#    SECONDARY_SPECIES
   /
 END
 
@@ -149,7 +149,7 @@ END
 
 #=========================== fluid properties =================================
 FLUID_PROPERTY
-  DIFFUSION_COEFFICIENT !d!
+  DIFFUSION_COEFFICIENT 1.00e-09
 END
 
 #=========================== material properties ==============================
@@ -249,24 +249,24 @@ END
 #=========================== constraints ======================================^M
 CONSTRAINT initial
   CONCENTRATIONS
-    A(aq)   1.d-20 T
-    H+      -0.00011723 T
-    O2(aq)  2.84d-4 T
-    CrO4--  1.92d-5 T # 1000 ppb
-    S2O4--  1.d-20 T
-    S2O3--  1.d-20 T
-    SO3--   1.d-20 T
-    SO4--   1.d-20 T
-    Fe+++   1.d-20 T
-    Cr+++   1.d-20 T
-    HCO3-   0.000117229 T
-    Ca++    0.000117229 T
-    K+      1.00d-05
+    H+ -1.1723e-04 T
+    O2(aq) 2.8400e-04 T
+    CrO4-- 1.9200e-05 T
+    S2O4-- 1.0000e-20 T
+    S2O3-- 1.0000e-20 T
+    SO3-- 1.0000e-20 T
+    SO4-- 1.0000e-20 T
+    Fe+++ 1.0000e-20 T
+    Cr+++ 1.0000e-20 T
+    HCO3- 1.1723e-04 T
+    Ca++ 1.1723e-04 T
+    K+ 1.0000e-20 T
+    Na+ 1.0000e-20 T
   /
   MINERALS
     Fe(OH)3(s) !ifeoh3!  1.d3 # 1% mass percent
     Cr(OH)3(s) 1.d-20 1.d3
-    Calcite    0.00999858 1.d3
+    Calcite 2.2099e-02 1.d3
   /
   IMMOBILE
     slow_Fe++ 1.0d-20
@@ -276,25 +276,24 @@ END
 
 CONSTRAINT inlet
   CONCENTRATIONS
-    A(aq)   1.d-20 T
-    H+      -0.00011723 T
-    O2(aq)  2.84d-4 T
-    CrO4--  1.92d-5 T # 1000 ppb
-    S2O4--  1.d-20 T
-    S2O3--  1.d-20 T
-    SO3--   1.d-20 T
-    SO4--   1.d-20 T
-    Fe+++   1.d-20 T
-    Cr+++   1.d-20 T
-    HCO3-   0.000117229 T
-    Ca++    0.000117229 T
-    K+      1.00d-05
+    H+ -1.1723e-04 T
+    O2(aq) 2.8400e-04 T
+    CrO4-- 1.9200e-05 T
+    S2O4-- 1.0000e-20 T
+    S2O3-- 1.0000e-20 T
+    SO3-- 1.0000e-20 T
+    SO4-- 1.0000e-20 T
+    Fe+++ 1.0000e-20 T
+    Cr+++ 1.0000e-20 T
+    HCO3- 1.1723e-04 T
+    Ca++ 1.1723e-04 T
+    K+ 1.0000e-20 T
+    Na+ 1.0000e-20 T
   /
 END
 
 CONSTRAINT injectant
   CONCENTRATIONS
-    A(aq)   1.d-1 T
     H+     -0.4 T
     O2(aq)  2.84d-4 T
     CrO4--  1.d-20 T
@@ -304,9 +303,10 @@ CONSTRAINT injectant
     SO4--   1.d-20 T
     Fe+++   1.d-20 T
     Cr+++   1.d-20 T
-    HCO3-   0.4 T
+    HCO3-   0.4d0 T
     Ca++    1.d-20 T
-    K+      0.4 T
+    K+      0.8d0 T
+    Na+     !ina! T
   /
 END
 

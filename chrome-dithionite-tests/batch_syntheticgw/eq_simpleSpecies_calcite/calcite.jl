@@ -4,48 +4,83 @@ plt = PyPlot
 import DataFrames
 df = DataFrames
 
-myvar = [
-"4-pH obs (1) (0.5 0.5 0.5)"                            
-"5-Total H+ [M] obs (1) (0.5 0.5 0.5)"                  
-"6-Total O2(aq) [M] obs (1) (0.5 0.5 0.5)"              
-"7-Total CrO4-- [M] obs (1) (0.5 0.5 0.5)"              
-"8-Total S2O4-- [M] obs (1) (0.5 0.5 0.5)"              
-"9-Total S2O3-- [M] obs (1) (0.5 0.5 0.5)"              
-"10-Total SO3-- [M] obs (1) (0.5 0.5 0.5)"              
-"11-Total SO4-- [M] obs (1) (0.5 0.5 0.5)"              
-"12-Total Fe+++ [M] obs (1) (0.5 0.5 0.5)"              
-"13-Total Cr+++ [M] obs (1) (0.5 0.5 0.5)"              
-"14-Total HCO3- [M] obs (1) (0.5 0.5 0.5)"              
-"15-Total Ca++ [M] obs (1) (0.5 0.5 0.5)"               
-"16-Total K+ [M] obs (1) (0.5 0.5 0.5)"                 
-"17-Total Na+ [M] obs (1) (0.5 0.5 0.5)"                
-"18-Fe(OH)3(s) VF obs (1) (0.5 0.5 0.5)"                
-"19-Cr(OH)3(s) VF obs (1) (0.5 0.5 0.5)"                
-"20-Calcite VF obs (1) (0.5 0.5 0.5)"                   
-]
+import sachFun
+import PyPlot
+plt = PyPlot
+import DataFrames
+df = DataFrames
 
-# results = sachFun.readObsDataset("calcite-obs-0.tec",myvar,dataframe=true)
-results = sachFun.readObsDataset("calcite-obs-0.tec",myvar)
-results2 = sachFun.readObsDataset("calcite_initial-obs-0.tec",myvar)
-results2df = df.DataFrame(name=myvar,conc=results[end,2:end],ic=results2[end,2:end],error = results[end,2:end]-results2[end,2:end])
-# 
-myvar = [
-"4-pH obs (1) (0.5 0.5 0.5)"                            
-"5-Total H+ [M] obs (1) (0.5 0.5 0.5)"                  
-"6-Total O2(aq) [M] obs (1) (0.5 0.5 0.5)"              
-"7-Total CrO4-- [M] obs (1) (0.5 0.5 0.5)"              
-"8-Total S2O4-- [M] obs (1) (0.5 0.5 0.5)"              
-"9-Total S2O3-- [M] obs (1) (0.5 0.5 0.5)"              
-"10-Total SO3-- [M] obs (1) (0.5 0.5 0.5)"              
-"11-Total SO4-- [M] obs (1) (0.5 0.5 0.5)"              
-"12-Total Fe+++ [M] obs (1) (0.5 0.5 0.5)"              
-"13-Total Cr+++ [M] obs (1) (0.5 0.5 0.5)"              
-"14-Total HCO3- [M] obs (1) (0.5 0.5 0.5)"              
-"15-Total Ca++ [M] obs (1) (0.5 0.5 0.5)"               
-"16-Total K+ [M] obs (1) (0.5 0.5 0.5)"                 
-"17-Total Na+ [M] obs (1) (0.5 0.5 0.5)"                
-]
+fname = "calcite-obs-0.tec"
+obsname = "obs"
 
-results3 = sachFun.readObsDataset("calcite_injectant-obs-0.tec",myvar)
-results4 = sachFun.readObsDataset("calcite_injectant_check-obs-0.tec",myvar)
-results4df = df.DataFrame(name=myvar,inj=results3[end,2:end],inj_check=results4[end,2:end],error = results3[end,2:end]-results4[end,2:end])
+chemnames = sachFun.getChemNames(fname, obsname)
+charges = sachFun.getObsCharges(fname,obsname)
+conc_species = sachFun.readObsDataset(fname,chemnames)
+results_species = df.DataFrame(name=chemnames,conc=conc_species[end,2:end])
+df.sort!(results_species, cols = [df.order(Symbol("conc"))],rev=true)
+
+totnames = sachFun.getChemNamesTotal(fname,obsname)
+conc_tots = sachFun.readObsDataset(fname,totnames)
+results_tots = df.DataFrame(name=totnames,conc=conc_tots[end,2:end])
+
+mnrlnames = sachFun.getChemNamesMnrl(fname,obsname)
+conc_mnrl = sachFun.readObsDataset(fname,mnrlnames)
+results_mnrl = df.DataFrame(name=mnrlnames,conc=conc_mnrl[end,2:end])
+
+pH = sachFun.readObsDataset(fname,["pH"])[2,end]
+
+for totname in totnames
+    if contains(totname,"Cr+++") || contains(totname,"Fe+++")
+        print("    $(split(split(totname,"[M]")[1],"Total ")[2])")
+        @printf "%.4e " 1.0e-20
+        print("T")
+        println()
+    else
+        print("    $(split(split(totname,"[M]")[1],"Total ")[2])")
+        @printf "%.4e " results_tots[results_tots[Symbol("name")].==totname,Symbol("conc")][1]
+        print("T")
+        println()
+    end
+end
+
+println()
+for mnrlname in mnrlnames
+    if contains(mnrlname,"Cr(OH)3") || contains(mnrlname,"Fe(OH)3")
+        print("    $(split(mnrlname,"VF")[1][4:end])")
+        @printf "%.4e " 0.0
+        print("1.d3")
+        println()
+    else
+        print("    $(split(mnrlname,"VF")[1][4:end])")
+        @printf "%.4e " results_mnrl[results_mnrl[Symbol("name")].==mnrlname,Symbol("conc")][1]
+        print("1.d3")
+        println()
+    end
+end
+
+# Now compare with minerals_initial
+fname2 = "calcite_initial-obs-0.tec"
+conc_tots2 = sachFun.readObsDataset(fname2,totnames)
+conc_mnrl2 = sachFun.readObsDataset(fname2,mnrlnames)
+
+results_mnrl_compare = df.DataFrame(name=mnrlnames,one=conc_mnrl[end,2:end],two=conc_mnrl2[end,2:end], error = conc_mnrl[end,2:end]-conc_mnrl2[end,2:end])
+results_tots_compare = df.DataFrame(name=totnames,one=conc_tots[end,2:end], two=conc_tots2[end,2:end], error = conc_tots[end,2:end]-conc_tots2[end,2:end])
+
+pH2 = sachFun.readObsDataset(fname2,["pH"])[2,end]
+
+# Now check injectant
+fname3 = "calcite_injectant-obs-0.tec"
+conc_tots3 = sachFun.readObsDataset(fname3,totnames)
+results_tots3 = df.DataFrame(name=totnames,conc=conc_tots3[end,2:end])
+
+results_tots_compare = df.DataFrame(name=totnames,one=conc_tots3[end,2:end])
+
+pH3 = sachFun.readObsDataset(fname3,["pH"])[2,end]
+
+println()
+for totname in totnames
+    print("    $(split(split(totname,"[M]")[1],"Total ")[2])")
+    @printf "%.4e " results_tots3[results_tots3[Symbol("name")].==totname,Symbol("conc")][1]
+    print("T")
+    println()
+end

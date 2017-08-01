@@ -67,7 +67,7 @@ CHEMISTRY
     ALL
     FREE_ION
     TOTAL
-#    SECONDARY_SPECIES
+    SECONDARY_SPECIES
     PH
   /
 END
@@ -180,24 +180,24 @@ END
 #=========================== constraints ======================================
 CONSTRAINT initial
   CONCENTRATIONS
-    H+      -0.00011723 T
-    O2(aq)  2.84d-4 T
-    CrO4--  1.92d-5 T # 1000 ppb
-    S2O4--  1.d-20 T
-    S2O3--  1.d-20 T
-    SO3--   1.d-20 T
-    SO4--   1.d-20 T
-    Fe+++   1.d-20 T
-    Cr+++   1.d-20 T
-    K+      1.d-20 T
-    Na+     1.d-20 T
-    HCO3-   0.000117229 T
-    Ca++    0.000117229 T
+    H+ -1.1723e-04 T
+    O2(aq) 2.8400e-04 T
+    CrO4-- 1.9200e-05 T
+    S2O4-- 1.0000e-20 T
+    S2O3-- 1.0000e-20 T
+    SO3-- 1.0000e-20 T
+    SO4-- 1.0000e-20 T
+    Fe+++ 1.0000e-20 T
+    Cr+++ 1.0000e-20 T
+    HCO3- 1.1723e-04 T
+    Ca++ 1.1723e-04 T
+    K+ 1.0000e-20 T
+    Na+ 1.0000e-20 T
   /
   MINERALS
-    Fe(OH)3(s) 3.86d-3 1.d3 # 1% mass percent
-    Cr(OH)3(s) 1.d-20 1.d3
-    Calcite    0.00999858 1.d3
+    Fe(OH)3(s) 0.0000e+00 1.d3
+    Cr(OH)3(s) 0.0000e+00 1.d3
+    Calcite 2.2099e-02 1.d3
   /
   IMMOBILE
     slow_Fe++ 1.0d-20
