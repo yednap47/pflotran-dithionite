@@ -113,16 +113,16 @@ END
 #=========================== discretization ===================================
 GRID
   TYPE structured
-  NXYZ 125 75 1
+  NXYZ 100 75 1
   BOUNDS
     0.0 0.0 0.0
-    125.0 75.0 30.0
+    100.0 75.0 30.0
   /
 END
 
 #============================== dataset =======================================
 DATASET Permeability
-  FILENAME ../fieldGeneration/rand_125x75_corr10_sig1_20mpd.h5
+  FILENAME ../fieldGeneration/multirealization/corr1_sig1/rand_100x75_corr10_sig1_20mpd_n6.h5
 END
 
 #=========================== fluid properties =================================
@@ -186,7 +186,7 @@ END
 REGION all
   COORDINATES
      0.0 0.0 0.0
-     125.0 75.0 30.0
+     100.0 75.0 30.0
   /
 END
 
@@ -218,8 +218,8 @@ END
 REGION east
   FACE EAST
   COORDINATES
-     125.0 0.0 0.0
-     125.0 75.0 30.0
+     100.0 0.0 0.0
+     100.0 75.0 30.0
   /
 END
 
@@ -292,12 +292,12 @@ FLOW_CONDITION east
     PRESSURE hydrostatic
   /
   DATUM 0.d0 0.d0 0.d0
-  PRESSURE 9.76963149e+06
+  PRESSURE 9.77146501e+06
 END
 
 FLOW_CONDITION injectant
   TYPE
-    RATE mass_rate 
+    RATE mass_rate
   /
   RATE list
     TIME_UNITS d
@@ -469,7 +469,7 @@ SOURCE_SINK inj2
   REGION inj2
 END
 
-SOURCE_SINK
+SOURCE_SINK inj3
   TRANSPORT_CONDITION injectant
   FLOW_CONDITION injectant
   REGION inj3

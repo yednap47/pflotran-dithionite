@@ -115,16 +115,16 @@ END
 #=========================== discretization ===================================
 GRID
   TYPE structured
-  NXYZ 125 75 1
+  NXYZ 100 75 1
   BOUNDS
     0.0 0.0 0.0
-    125.0 75.0 30.0
+    100.0 75.0 30.0
   /
 END
 
 #============================== dataset =======================================
 DATASET Permeability
-  FILENAME ../fieldGeneration/rand_125x75_corr10_sig1_20mpd.h5
+  FILENAME ../fieldGeneration/multirealization/corr1_sig1/rand_100x75_corr10_sig1_20mpd_n6.h5
 END
 
 #=========================== fluid properties =================================
@@ -182,7 +182,7 @@ END
 REGION all
   COORDINATES
      0.0 0.0 0.0
-     125.0 75.0 30.0
+     100.0 75.0 30.0
   /
 END
 
@@ -214,8 +214,8 @@ END
 REGION east
   FACE EAST
   COORDINATES
-     125.0 0.0 0.0
-     125.0 75.0 30.0
+     100.0 0.0 0.0
+     100.0 75.0 30.0
   /
 END
 
@@ -225,6 +225,39 @@ REGION source
     24.0 42.0 30.0
   /
 END
+
+REGION inj1
+  COORDINATES
+    25.5 33.5 0.0
+    25.5 33.5 30.0
+  /
+END
+
+REGION inj2
+  COORDINATES
+    25.5 38.5 0.0
+    25.5 38.5 30.0
+  /
+END
+
+REGION inj3
+  COORDINATES
+    25.5 43.5 0.0
+    25.5 43.5 30.0
+  /
+END
+
+REGION obs1
+  COORDINATES
+    75.5 38.5 0.0
+    75.5 38.5 30.0
+  /
+END
+
+#=========================== observation points ==============================
+OBSERVATION obs1
+  REGION obs1
+/
 
 #=========================== flow conditions ==================================
 FLOW_CONDITION initial
@@ -255,7 +288,19 @@ FLOW_CONDITION east
     PRESSURE hydrostatic
   /
   DATUM 0.d0 0.d0 0.d0
-  PRESSURE 9.76963149e+06
+  PRESSURE 9.77146501e+06
+END
+
+FLOW_CONDITION injectant
+  TYPE
+    RATE mass_rate
+  /
+  RATE list
+    TIME_UNITS d
+    DATA_UNITS kg/s
+    0.d0 0.943665
+    2.d0 0.0
+  /
 END
 
 #=========================== transport conditions =============================
@@ -284,6 +329,13 @@ TRANSPORT_CONDITION outlet
   TYPE dirichlet_zero_gradient
   CONSTRAINT_LIST
     0.d0 inlet
+  /
+END
+
+TRANSPORT_CONDITION injectant
+  TYPE dirichlet
+  CONSTRAINT_LIST
+    0.d0 injectant
   /
 END
 
@@ -348,6 +400,24 @@ CONSTRAINT source
     Ca++ 1.1723e-04 T
     K+ 1.0000e-20 T
     Na+ 1.0000e-20 T
+  /
+END
+
+CONSTRAINT injectant
+  CONCENTRATIONS
+    H+     -0.4 T
+    O2(aq)  2.84d-4 T
+    CrO4--  1.d-20 T
+    S2O4--  0.1d0 T
+    S2O3--  1.d-20 T
+    SO3--   1.d-20 T
+    SO4--   1.d-20 T
+    Fe+++   1.d-20 T
+    Cr+++   1.d-20 T
+    HCO3-   0.4d0 T
+    Ca++    1.d-20 T
+    K+      0.8d0 T
+    Na+     0.2d0 T
   /
 END
 

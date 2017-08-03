@@ -6,13 +6,13 @@ plt = PyPlot
 filename = "src.h5"
 mytimesteps = 1:1:100
 myvar = ["Total_CrO4-- [M]"]
-nx = 125
+nx = 100
 ny = 75
 dxyz = 1
 MW_Cr = 52.0
 
-if !isdir("test")
-    mkdir("test")
+if !isdir("movie")
+    mkdir("movie")
 end
 
 for mytimestep in mytimesteps
