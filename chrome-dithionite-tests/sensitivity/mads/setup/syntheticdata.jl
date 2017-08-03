@@ -61,7 +61,7 @@ function writemadstargets(basedir::String, myvar::Array{String,1}, timeUnits::St
 end
 
 # general info
-basedir = "/lclscratch/sach/Programs/pflotran-dithionite-git/chrome-dithionite-tests"
+basedir = "/lclscratch/sach/Programs/pflotran-dithionite/chrome-dithionite-tests"
 simbasename = "1d-allReactions-10m-uniformVelocity"
 targetsfname = "syntheticdata"
 

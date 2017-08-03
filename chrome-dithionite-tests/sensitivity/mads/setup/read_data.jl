@@ -25,7 +25,7 @@ function readdata(d)
         np = 8
         maxruntime = 2.0 * 60.0 * 60.0 # seconds from hours
 
-        pfpath = "/lclscratch/sach/Programs/pflotran-dithionite-git/src/pflotran"
+        pfpath = "/lclscratch/sach/Programs/pflotran-dithionite/src/pflotran"
         masstag = casetag * "-mas.dat"
         otag = casetag * ".out"
         crtag = "Cr6_Obs_t"
@@ -59,7 +59,7 @@ function readdata(d)
         end
 
         # Check to make sure you have all of the observations
-        obskeys = Mads.getobskeys(md)
+        obskeys = Mads.getobskeys(d)
         if length(results) != length(obskeys)
             error("Number of simulated results does not match number of obskeys!!")
         end

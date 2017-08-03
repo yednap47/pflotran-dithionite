@@ -13,12 +13,18 @@ function writemadstargets(basedir::String, myvar::Array{String,1}, timeUnits::St
         results = sachFun.readObsDataset(obsdatafname,myvar)
     end
     
-    outfile = open(joinpath(".","syntheticdata","$(targetsfname)-skip$(skipfactor)-targets.txt"), "w")
+    outfile = open(joinpath(".","syntheticdata","$(targetsfname)-nn-skip$(skipfactor)-targets.txt"), "w")
 
     x = results[:,1]
     y1 = -results[:,2]
-    obstimes = x
-    targets = y1
+    if skipfactor != 0
+        obstimes = x[1:skipfactor:end]
+        targets = y1[1:skipfactor:end]
+    else
+        obstimes = x
+        targets = y1
+    end
+
     # non-negative values only:
     targets_nn = targets[targets.>0]
     obstimes_nn = obstimes[targets.>0]
@@ -34,7 +40,7 @@ function writemadstargets(basedir::String, myvar::Array{String,1}, timeUnits::St
 
         plt.title(myvar)
         plt.legend()
-        plt.savefig(joinpath(".","syntheticdata","$(targetsfname)-skip$(skipfactor).png"))
+        plt.savefig(joinpath(".","syntheticdata","$(targetsfname)-nn-skip$(skipfactor).png"))
         plt.close()
     end
 
@@ -48,7 +54,7 @@ function writemadstargets(basedir::String, myvar::Array{String,1}, timeUnits::St
     close(outfile)
     
     # print observation times
-    outfile2 = open(joinpath(".","syntheticdata","$(targetsfname)-skip$(skipfactor)-times.txt"), "w")
+    outfile2 = open(joinpath(".","syntheticdata","$(targetsfname)-nn-skip$(skipfactor)-times.txt"), "w")
     write(outfile2, "  TIMES $(timeUnits) ")
     for t in obstimes_nn
         @printf(outfile2,"%.1f ", t)
@@ -60,14 +66,14 @@ function writemadstargets(basedir::String, myvar::Array{String,1}, timeUnits::St
 end
 
 # general info
-basedir = "/lclscratch/sach/Programs/pflotran-dithionite-git/chrome-dithionite-tests"
+basedir = "/lclscratch/sach/Programs/pflotran-dithionite/chrome-dithionite-tests"
 simbasename = "1d-allReactions-10m-uniformVelocity"
 targetsfname = "syntheticdata"
 
 # User info for making synthetic data
 myvar = ["east CrO4-- [mol/d]"]
 mystd = 2.e-6 # standard deviation
-skipfactor = 0 # resolution of targets vs simulation output
+skipfactor = 10 # resolution of targets vs simulation output
 caltag = "Cr6_Obs"
 timeUnits = "d"
 
