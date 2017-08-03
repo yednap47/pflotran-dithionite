@@ -21,8 +21,8 @@ end
 #------------------------------------------------------------------------------
 # User info
 #------------------------------------------------------------------------------
-basedir = "/lclscratch/sach/Programs/pflotran-dithionite-git/chrome-dithionite-tests/sensitivity/singleParameter"
-rundir = "attempt3"
+basedir = "/lclscratch/sach/Programs/pflotran-dithionite/chrome-dithionite-tests/sensitivity/singleParameter"
+rundir = "attempt1"
 simbasename = "1d-allReactions-10m-uniformVelocity"
 sensparams = [
               "k_s2o4_disp",
@@ -35,7 +35,6 @@ sensparams = [
               "factor_k_fe2_cr6_slow",
               "is2o4",
               "ifeoh3",
-              "d",
               "q",
               ]
 
@@ -50,7 +49,6 @@ coolnames =  [
               L"\mathrm{f_{\equiv Fe(II)-HCrO_4^-}}",
               L"\mathrm{[Na_2S_2O_4]}",
               L"\mathrm{Wt.\%_{Fe(OH)_3(s)}}",
-              L"\mathrm{D}",
               L"\mathrm{q}",
               ]
 
@@ -143,8 +141,8 @@ mysize = 9
 linewidth = 1
 f, ax = plt.subplots(1,2,figsize=(6.5,2.75))
 majorFormatter = plt.matplotlib[:ticker][:FormatStrFormatter]("%0.2e")
-# mycmap = plt.get_cmap("hsv",length(sensparams)+1)
-mycmap = plt.get_cmap("Paired",length(sensparams)+1)
+mycmap = plt.get_cmap("Paired",length(sensparams)); extracolor = "0.5"; colorparam = "is2o4"
+# mycmap = plt.get_cmap("nipy_spectral",length(sensparams)+1); extracolor = "brown"; colorparam = "q"
 for sensparam in sensparams
     if sensparam != "d"
     # find the index of sensparam in paramkeys to get base value in params_init
@@ -169,7 +167,11 @@ for sensparam in sensparams
         # # ax[:set_ylim](0.0,4e-2)
 
         # cumulative Cr(VI) at the outflow
-        ax[1][:plot](results[sensparam]["sensvals"]/basevalue, results[sensparam]["tot Cr(VI)"], marker="x", color=mycmap(i), label=coolnames[i])
+        if sensparam == colorparam
+            ax[1][:plot](results[sensparam]["sensvals"]/basevalue, results[sensparam]["tot Cr(VI)"], marker="x", color=extracolor, label=coolnames[i])
+        else
+            ax[1][:plot](results[sensparam]["sensvals"]/basevalue, results[sensparam]["tot Cr(VI)"], marker="x", color=mycmap(i), label=coolnames[i])
+        end
         ax[1][:set_xlim](minimum(results[sensparam]["sensvals"])/basevalue,maximum(results[sensparam]["sensvals"])/basevalue)
         ax[1][:yaxis][:set_major_formatter](majorFormatter)
         ax[1][:set_title](L"\mathrm{(A)}",fontsize = mysize)
@@ -181,7 +183,11 @@ for sensparam in sensparams
         ax[1][:tick_params](labelsize=mysize)
         
         # maximum surface bound Fe(II)
-        ax[2][:plot](results[sensparam]["sensvals"]/basevalue, results[sensparam]["max Fe(II)"], marker="x", color=mycmap(i), label=coolnames[i])
+        if sensparam == colorparam
+            ax[2][:plot](results[sensparam]["sensvals"]/basevalue, results[sensparam]["max Fe(II)"], marker="x", color=extracolor, label=coolnames[i])
+        else
+            ax[2][:plot](results[sensparam]["sensvals"]/basevalue, results[sensparam]["max Fe(II)"], marker="x", color=mycmap(i), label=coolnames[i])
+        end
         ax[2][:set_xlim](minimum(results[sensparam]["sensvals"])/basevalue,maximum(results[sensparam]["sensvals"])/basevalue)
         ax[2][:yaxis][:set_major_formatter](majorFormatter)
         ax[2][:set_title](L"\mathrm{(B)}",fontsize = mysize)
