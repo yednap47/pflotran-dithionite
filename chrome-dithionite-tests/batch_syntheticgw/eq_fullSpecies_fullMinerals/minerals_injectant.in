@@ -109,46 +109,6 @@ CHEMISTRY
     Cr(OH)4-
     MgOH+
   /
-  IMMOBILE_SPECIES
-    slow_Fe++
-    fast_Fe++
-  /
-  MINERALS
-    Fe(OH)3(s)
-    Cr(OH)3(s)
-#    Halite
-    Calcite
-    Siderite
-    Dolomite
-    Anhydrite
-    K-Feldspar
-  /
-  MINERAL_KINETICS
-    Fe(OH)3(s)
-      RATE_CONSTANT 1.d-3 mol/m^2-sec
-    /
-    Cr(OH)3(s)
-      RATE_CONSTANT 1.d-3 mol/m^2-sec
-    /
-    Calcite
-      RATE_CONSTANT 1.d-3 mol/m^2-sec
-    /
-#    Halite
-#      RATE_CONSTANT 1.d-3 mol/m^2-sec
-#    /
-    Siderite
-      RATE_CONSTANT 1.d-3 mol/m^2-sec
-    /
-    Dolomite
-      RATE_CONSTANT 1.d-3 mol/m^2-sec
-    /
-    Anhydrite
-      RATE_CONSTANT 1.d-3 mol/m^2-sec
-    /
-    K-Feldspar
-      RATE_CONSTANT 1.d-3 mol/m^2-sec
-    /
-  /
   DATABASE /lclscratch/sach/Programs/pflotran-dithionite/chrome-dithionite-tests/chromium_dithionite_2017_v2.dat
   ACTIVITY_COEFFICIENTS TIMESTEP
   LOG_FORMULATION
@@ -262,45 +222,31 @@ END
 TRANSPORT_CONDITION initial
   TYPE dirichlet
   CONSTRAINT_LIST
-    0.d0 initial
+    0.d0 injectant
   /
 END
 
 #=========================== constraints ======================================
-CONSTRAINT initial
+CONSTRAINT injectant
   CONCENTRATIONS
-    H+       6.5 P
-    O2(aq)   2.84d-4 T
-    CrO4--   1.92d-5 T # 1000 ppb Cr(VI)
-    S2O4--   1.d-20 T
+    H+      -0.4 T
+    O2(aq)   2.8400e-04 T
+    CrO4--   1.d-20 T
+    S2O4--   1.d-1 T
     S2O3--   1.d-20 T
     SO3--    1.d-20 T
     SO4--    1.d-20 T
     Fe++     1.d-20 T
     Fe+++    1.d-20 T
     Cr+++    1.d-20 T
-    HCO3-    1.d-20 T
+    HCO3-    0.4 T
     Ca++     1.d-20 T
-    K+       1.d-20 T
-    Na+      1.d-20 T
+    K+       0.8 T
+    Na+      2.d-1 T
     Cl-      1.d-20 T
     Mg++     1.d-20 T
     SiO2(aq) 1.d-20 T
     Al+++    1.d-20 T
-  /
-  MINERALS
-    Fe(OH)3(s) 0.d0 1.0e+03
-    Cr(OH)3(s) 0.d0 1.0e+03
-    Calcite 4.43e-03 1.0e+03
-#    Halite 5.55e-03 1.0e+03
-    Siderite 3.04e-03 1.0e+03
-    Dolomite 4.19e-03 1.0e+03
-    Anhydrite 4.05e-03 1.0e+03
-    K-Feldspar 4.69e-03 1.0e+03
-  /
-  IMMOBILE
-    slow_Fe++ 1.00d-20
-    fast_Fe++ 1.00d-20
   /
 END
 

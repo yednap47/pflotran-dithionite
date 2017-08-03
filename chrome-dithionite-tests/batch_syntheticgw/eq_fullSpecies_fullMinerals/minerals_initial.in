@@ -269,34 +269,33 @@ END
 #=========================== constraints ======================================
 CONSTRAINT initial
   CONCENTRATIONS
-    H+       6.5 P
-    O2(aq)   2.84d-4 T
-    CrO4--   1.92d-5 T # 1000 ppb Cr(VI)
-    S2O4--   1.d-20 T
-    S2O3--   1.d-20 T
-    SO3--    1.d-20 T
-    SO4--    1.d-20 T
-    Fe++     1.d-20 T
-    Fe+++    1.d-20 T
-    Cr+++    1.d-20 T
-    HCO3-    1.d-20 T
-    Ca++     1.d-20 T
-    K+       1.d-20 T
-    Na+      1.d-20 T
-    Cl-      1.d-20 T
-    Mg++     1.d-20 T
-    SiO2(aq) 1.d-20 T
-    Al+++    1.d-20 T
+    H+ -8.9238e-05 T
+    O2(aq) 2.8400e-04 T
+    CrO4-- 1.9200e-05 T
+    S2O4-- 1.0000e-20 T
+    S2O3-- 1.0000e-20 T
+    SO3-- 1.0000e-20 T
+    SO4-- 2.4374e-02 T
+    Fe++ 2.3069e-04 T
+    Fe+++ 1.00e-20 T
+    Cr+++ 1.00e-20 T
+    HCO3- 4.1709e-05 T
+    Ca++ 2.2387e-02 T
+    K+ 1.4318e-05 T
+    Na+ 1.0000e-20 T
+    Cl- 1.0000e-20 T
+    Mg++ 1.7980e-03 T
+    SiO2(aq) 4.2954e-05 T
+    Al+++ 1.4318e-05 T
   /
   MINERALS
-    Fe(OH)3(s) 0.d0 1.0e+03
-    Cr(OH)3(s) 0.d0 1.0e+03
-    Calcite 4.43e-03 1.0e+03
-#    Halite 5.55e-03 1.0e+03
-    Siderite 3.04e-03 1.0e+03
-    Dolomite 4.19e-03 1.0e+03
-    Anhydrite 4.05e-03 1.0e+03
-    K-Feldspar 4.69e-03 1.0e+03
+    Fe(OH)3(s) 0.0000e+00 1.d3
+    Cr(OH)3(s) 0.0000e+00 1.d3
+    Calcite 4.4759e-03 1.d3
+    Siderite 3.0378e-03 1.d3
+    Dolomite 4.1520e-03 1.d3
+    Anhydrite 3.6827e-03 1.d3
+    K-Feldspar 4.6895e-03 1.d3
   /
   IMMOBILE
     slow_Fe++ 1.00d-20
