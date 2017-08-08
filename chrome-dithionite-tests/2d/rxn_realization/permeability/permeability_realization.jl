@@ -61,10 +61,12 @@ function runforabit(command, timelimit, pollinterval=1)
     end
 end
 
+# Arguments (to run in "parallel")
+nstart = parse(Int, ARGS[1])
+nfinish = parse(Int, ARGS[2])
+
 # User info
 sensparam = "permfname"
-
-
 
 # pflotran information
 rundir =  "corr1_sig1" # where the simulations are going
@@ -74,7 +76,7 @@ permfielddir = "/lclscratch/sach/Programs/pflotran-dithionite/chrome-dithionite-
 pfle = "/lclscratch/sach/Programs/pflotran-dithionite/src/pflotran/pflotran"
 np = 16
 maxruntime = 5.0 * 60.0 * 60.0 # seconds from hours
-nrealizations = 1:1:100
+nrealizations = nstart:1:nfinish
 
 # make run directory
 if !isdir(joinpath(basedir,rundir))
