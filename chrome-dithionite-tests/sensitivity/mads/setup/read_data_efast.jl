@@ -25,7 +25,7 @@ function readdata_efast(d)
         np = 8
         maxruntime = 2.0 * 60.0 * 60.0 # seconds from hours
 
-        pfpath = "/lclscratch/sach/Programs/pflotran-dithionite-git/src/pflotran"
+        pfpath = "/lclscratch/sach/Programs/pflotran-dithionite/src/pflotran"
         masstag = casetag * "-mas.dat"
         otag = casetag * ".out"
         crtag = "Cr6_Obs_t"

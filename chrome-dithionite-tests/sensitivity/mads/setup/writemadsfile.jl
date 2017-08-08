@@ -6,13 +6,13 @@ import DataFrames
 # Initialize
 #------------------------------------------------------------------------------
 # general info
-basedir = "/lclscratch/sach/Programs/pflotran-dithionite-git/chrome-dithionite-tests"
+basedir = "/lclscratch/sach/Programs/pflotran-dithionite/chrome-dithionite-tests"
 simbasename = "1d-allReactions-10m-uniformVelocity"
-targetsbasename = "syntheticdata-skip10"
+targetsbasename = "syntheticdata-nn-skip10"
 
 # Default parameters for writing MADS file
 paramfilename = "../../parameters.xlsx"
-sheetname = "mads_efast"
+sheetname = "mads"
 jcommand = "read_data.jl"
 soltype = "external"
 startover = "true"
@@ -49,6 +49,9 @@ end
 # Do the tranformations for slow site kinetic constants
 write(outfile, "- k_fe2_o2_slow: {exp: \"10^log_k_fe2_o2_fast*10^log_factor_k_fe2_o2_slow\"}\n")
 write(outfile, "- k_fe2_cr6_slow: {exp: \"10^log_k_fe2_cr6_fast*10^log_factor_k_fe2_cr6_slow\"}\n")
+
+# Added function for initial [Na+]
+write(outfile, "- ina: {exp: \"2*10^log_is2o4\"}\n")
 
 # Finish writing mads file
 println(outfile,"Solution: $(soltype)")
