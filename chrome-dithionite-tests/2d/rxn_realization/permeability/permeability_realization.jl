@@ -44,7 +44,6 @@ function writeparametersviatemplate(parameters, templatefilename, outputfilename
 	close(outfile)
 end
 
-
 function runforabit(command, timelimit, pollinterval=1)
     # kills terminal command if time limit is exceeded
     # note, all times are in seconds
