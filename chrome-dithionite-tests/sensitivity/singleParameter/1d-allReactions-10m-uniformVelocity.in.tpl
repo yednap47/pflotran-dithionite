@@ -264,7 +264,7 @@ CONSTRAINT initial
     Na+ 1.0000e-20 T
   /
   MINERALS
-    Fe(OH)3(s) !ifeoh3!  1.d3 # 1% mass percent
+    Fe(OH)3(s) !ifeoh3!  1.d3
     Cr(OH)3(s) 1.d-20 1.d3
     Calcite 2.2099e-02 1.d3
   /

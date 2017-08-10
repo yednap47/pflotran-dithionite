@@ -1,4 +1,4 @@
-Julia command: read_data.jl
+Julia command: read_data_efast.jl
 Observations:
 - Cr6_Obs_t1: {target: 2.88000e-05, weight: 100.0, time: 1.00}
 - Cr6_Obs_t2: {target: 2.88000e-05, weight: 100.0, time: 2.00}
@@ -391,5 +391,5 @@ Parameters:
 - ina: {exp: "2*10^log_is2o4"}
 Solution: external
 Templates:
-- tmp1: {tpl: 1d-allReactions-10m-uniformVelocity.in.tpl, write: 1d-allReactions-10m-uniformVelocity.in}
+- tmp1: {tpl: 1d-allReactions-10m-uniformVelocity-efast.in.tpl, write: 1d-allReactions-10m-uniformVelocity-efast.in}
 Restart: true
