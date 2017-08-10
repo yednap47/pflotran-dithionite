@@ -30,7 +30,8 @@ Mads.plotobsSAresults(md, efastresult,
                       xtitle = "x", ytitle = "y")
 
 toc()
-# elapsed time: 217807.70178015 seconds
+# elapsed time: 220263.713274993 seconds
+JLD.save("efastresult.jld","dictionary",efastresult)
 
 # ================ PLOT RESULTS WITH PYPLOT ================================== #
 coolnames  = JLD.load("../setup/coolnames.jld","dictionary")
@@ -62,7 +63,20 @@ majorFormatter = matplotlib[:ticker][:FormatStrFormatter]("%0.1e")
 mycmap = plt.get_cmap("Paired",15)
 linewidth = 1.5
 f, ax = plt.subplots(4, 1, sharex=true, figsize=(8,10))
-ax[1][:plot](d[1,:],d[2,:],lw=linewidth)
+
+# Spaghetti plots
+restartdir = "1d-allReactions-10m-uniformVelocity-tightened-efast_restart"
+forwarddict = Dict()
+times = Mads.getobstime(md)
+fnames = readdir(restartdir)
+for i in 1:length(fnames)
+    forwarddict["run$(i)"] = JLD.load(joinpath(restartdir,fnames[i]))
+end
+for i in 1:length(fnames)
+    ax[1][:plot](times,forwarddict["run$(i)"]["vecresult"])
+end
+
+# Other plots
 for i in 1:nP
     ax[2][:plot](d[1,:],tes[i,:],lw=linewidth,c=mycmap(i),label=coolnames[paramkeys[i]])
     ax[3][:plot](d[1,:],mes[i,:],lw=linewidth,c=mycmap(i))
