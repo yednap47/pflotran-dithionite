@@ -3,9 +3,9 @@ using PyPlot
 plt = PyPlot
 import Mads
 
-efastresult  = JLD.load("efastresult.jld","dictionary")
-coolnames  = JLD.load("../setup/coolnames.jld","dictionary")
-md = Mads.loadmadsfile("1d-allReactions-10m-uniformVelocity-tightened-efast.mads")
+efastresult  = JLD.load("./datafiles/efastresult.jld","dictionary")
+coolnames  = JLD.load("./datafiles/coolnames.jld","dictionary")
+md = Mads.loadmadsfile("./datafiles/1d-allReactions-10m-uniformVelocity-tightened-efast.mads")
 
 obsdict = md["Observations"]
 obskeys=Mads.getobskeys(md)
@@ -67,5 +67,6 @@ ax[1][:legend](loc=2, bbox_to_anchor=(1.0, 1.03),fontsize=mysize-2, frameon=fals
 
 f[:canvas][:draw]() # Update the figure
 
-plt.savefig("paper_globalsa.png",dpi=600)
+plt.savefig("./res_low/paper_globalsa.png",dpi=100)
+plt.savefig("./res_high/paper_globalsa.png",dpi=600)
 plt.close()

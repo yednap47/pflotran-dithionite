@@ -4,7 +4,7 @@ using PyPlot
 plt = PyPlot
 
 filename = "1d-allReactions-10m-uniformVelocity"
-dirname = "/lclscratch/sach/Programs/pflotran-dithionite/chrome-dithionite-tests/1d_parameterTests"
+dirname = "./datafiles"
 
 myvar = [
 "Total_O2(aq) [M]",
@@ -104,5 +104,6 @@ ax[i][:set_position]([box[:x0]-0.015, box[:y0], box[:width], box[:height]])
 end
 
 fig[:canvas][:draw]() # Update the figure
-savefig("cvsx_step2.png",dpi=100)
+savefig("./res_low/cvsx_step2.png",dpi=100)
+savefig("./res_high/cvsx_step2.png",dpi=600)
 close()

@@ -8,6 +8,7 @@ import Mads
 import PyPlot
 plt = PyPlot
 using LaTeXStrings
+import JLD
 
 function getTotalCr3_fromh5(istop,filename,myvar)
     # calculate moles using m^3/m^3_bulk, dxyz and molar volume
@@ -24,6 +25,8 @@ end
 basedir = "/lclscratch/sach/Programs/pflotran-dithionite/chrome-dithionite-tests/sensitivity/singleParameter"
 rundir = "attempt1"
 simbasename = "1d-allReactions-10m-uniformVelocity"
+coolnames = JLD.load("../mads/setup/coolnames.jld","dictionary")
+
 sensparams = [
               "k_s2o4_disp",
               "k_s2o4_o2",
@@ -38,19 +41,20 @@ sensparams = [
               "q",
               ]
 
-coolnames =  [
-              L"\mathrm{k_{S_2O_4^{-2}-disp}}",
-              L"\mathrm{k_{S_2O_4^{-2}-O_2(aq)}}",
-              L"\mathrm{k_{S_2O_4^{-2}-Fe(OH)_3(s)}}",
-              L"\mathrm{\phi_{fast}}",
-              L"\mathrm{k_{\equiv Fe(II)-O_2(aq)^-}}",
-              L"\mathrm{f_{\equiv Fe(II)-O_2(aq)^-}}",
-              L"\mathrm{k_{\equiv Fe(II)-HCrO_4^-}}",
-              L"\mathrm{f_{\equiv Fe(II)-HCrO_4^-}}",
-              L"\mathrm{[Na_2S_2O_4]}",
-              L"\mathrm{Wt.\%_{Fe(OH)_3(s)}}",
-              L"\mathrm{q}",
-              ]
+logsensparams = [
+                "log_k_s2o4_disp",
+                "log_k_s2o4_o2",
+                "log_k_s2o4_fe3",
+                "log_fraction",
+                "log_k_fe2_o2_fast",
+                "log_factor_k_fe2_o2_slow",
+                "log_k_fe2_cr6_fast",
+                "log_factor_k_fe2_cr6_slow",
+                "log_is2o4",
+                "log_ifeoh3",
+                "log_q",
+                ]
+
 
 nstops = 3 # number of sensitivity runs
 mytime = 365
@@ -168,9 +172,9 @@ for sensparam in sensparams
 
         # cumulative Cr(VI) at the outflow
         if sensparam == colorparam
-            ax[1][:plot](results[sensparam]["sensvals"]/basevalue, results[sensparam]["tot Cr(VI)"], marker="x", color=extracolor, label=coolnames[i])
+            ax[1][:plot](results[sensparam]["sensvals"]/basevalue, results[sensparam]["tot Cr(VI)"], marker="x", color=extracolor, label=coolnames[logsensparams[i]])
         else
-            ax[1][:plot](results[sensparam]["sensvals"]/basevalue, results[sensparam]["tot Cr(VI)"], marker="x", color=mycmap(i), label=coolnames[i])
+            ax[1][:plot](results[sensparam]["sensvals"]/basevalue, results[sensparam]["tot Cr(VI)"], marker="x", color=mycmap(i), label=coolnames[logsensparams[i]])
         end
         ax[1][:set_xlim](minimum(results[sensparam]["sensvals"])/basevalue,maximum(results[sensparam]["sensvals"])/basevalue)
         ax[1][:yaxis][:set_major_formatter](majorFormatter)
@@ -184,9 +188,9 @@ for sensparam in sensparams
         
         # maximum surface bound Fe(II)
         if sensparam == colorparam
-            ax[2][:plot](results[sensparam]["sensvals"]/basevalue, results[sensparam]["max Fe(II)"], marker="x", color=extracolor, label=coolnames[i])
+            ax[2][:plot](results[sensparam]["sensvals"]/basevalue, results[sensparam]["max Fe(II)"], marker="x", color=extracolor, label=coolnames[logsensparams[i]])
         else
-            ax[2][:plot](results[sensparam]["sensvals"]/basevalue, results[sensparam]["max Fe(II)"], marker="x", color=mycmap(i), label=coolnames[i])
+            ax[2][:plot](results[sensparam]["sensvals"]/basevalue, results[sensparam]["max Fe(II)"], marker="x", color=mycmap(i), label=coolnames[logsensparams[i]])
         end
         ax[2][:set_xlim](minimum(results[sensparam]["sensvals"])/basevalue,maximum(results[sensparam]["sensvals"])/basevalue)
         ax[2][:yaxis][:set_major_formatter](majorFormatter)
@@ -211,3 +215,15 @@ ax[2][:legend](loc=0,fontsize=mysize-2,loc=2, bbox_to_anchor=(1.1, 1.03), frameo
 f[:canvas][:draw]() # Update the figure
 plt.savefig("results_full_$(rundir)_$(mytime)$(timeunits).png",dpi=100)
 plt.close()
+
+savedata = Dict()
+savedata["results"] = results
+savedata["sensparams"] = sensparams
+savedata["logsensparams"] = logsensparams
+savedata["logparams_init"] = logparams_init
+savedata["paramkeys"] = paramkeys
+# savedata["coolnames"] = coolnames
+# savedata["extracolor"] = extracolor
+# savedata["mycmap"] = mycmap
+
+JLD.save("results_sensitivity_singleparam.jld","dictionary",savedata)
