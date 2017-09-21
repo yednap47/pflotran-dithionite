@@ -2,11 +2,12 @@ module Fracture_module
   
   use PFLOTRAN_Constants_module
 
+#include "petsc/finclude/petscsys.h"
+  use petscsys
+
   implicit none
   
   private
-
-#include "petsc/finclude/petscsys.h"
 
   PetscInt, parameter, public :: frac_init_pres_index = 1
   PetscInt, parameter, public :: frac_alt_pres_index = 2
@@ -37,7 +38,7 @@ module Fracture_module
             FracturePropertytoAux, &
             FractureDestroy, &
             FracturePoroEvaluate, &
-            FracturePermEvaluate
+            FracturePermScale
   
   contains
 
@@ -85,32 +86,29 @@ end subroutine FractureInit
 
 ! ************************************************************************** !
 
-subroutine FractureAuxVarInit(fracture_material,auxvar)
+subroutine FractureAuxVarInit(auxvar)
   !
-  ! Author: Heeho Park
-  ! Date: 7/8/2015
+  ! Author: Heeho Park, Glenn Hammond
+  ! Date: 7/8/2015, 6/15/17
   !
 
   use Material_Aux_class
   
   implicit none
   
-  class(fracture_type), pointer :: fracture_material
   class(material_auxvar_type), intent(inout) :: auxvar
 
-  if (associated(fracture_material)) then
-    allocate(auxvar%fracture)
-    allocate(auxvar%fracture%properties(4))
-    allocate(auxvar%fracture%vector(3))
-    auxvar%fracture%properties = 0.d0
-    auxvar%fracture%vector = 0.d0
-  endif
+  call MaterialAuxVarFractureStrip(auxvar%fracture)
+  allocate(auxvar%fracture)
+  auxvar%fracture%initial_pressure = UNINITIALIZED_DOUBLE
+  auxvar%fracture%properties = UNINITIALIZED_DOUBLE
+  auxvar%fracture%vector = 0.d0
 
 end subroutine FractureAuxVarInit
 
 ! ************************************************************************** !
 
-subroutine FracturePropertytoAux(auxvar,fracture_property)
+subroutine FracturePropertytoAux(fracture_auxvar,fracture_property)
   !
   ! Author: Heeho Park
   ! Date: 7/8/2015
@@ -120,24 +118,32 @@ subroutine FracturePropertytoAux(auxvar,fracture_property)
   
   implicit none
 
-  class(material_auxvar_type), intent(inout) :: auxvar
+  type(fracture_auxvar_type), pointer :: fracture_auxvar
   class(fracture_type), pointer :: fracture_property
 
-  
-  auxvar%fracture%properties(frac_init_pres_index) = &
-    fracture_property%init_pressure
-  auxvar%fracture%properties(frac_alt_pres_index) = &
-    fracture_property%altered_pressure
-  auxvar%fracture%properties(frac_max_poro_index) = &
-    fracture_property%maximum_porosity
-  auxvar%fracture%properties(frac_poro_exp_index) = &
-    fracture_property%porosity_exponent
-  auxvar%fracture%vector(frac_change_perm_x_index) = &
-    fracture_property%change_perm_x
-  auxvar%fracture%vector(frac_change_perm_y_index) = &
-    fracture_property%change_perm_y
-  auxvar%fracture%vector(frac_change_perm_z_index) = &
-    fracture_property%change_perm_z
+  if (associated(fracture_auxvar)) then
+    if (associated(fracture_property)) then
+      fracture_auxvar%fracture_is_on = PETSC_TRUE
+      fracture_auxvar%properties(frac_init_pres_index) = &
+        fracture_property%init_pressure
+      fracture_auxvar%properties(frac_alt_pres_index) = &
+        fracture_property%altered_pressure
+      fracture_auxvar%properties(frac_max_poro_index) = &
+        fracture_property%maximum_porosity
+      fracture_auxvar%properties(frac_poro_exp_index) = &
+        fracture_property%porosity_exponent
+      fracture_auxvar%vector(frac_change_perm_x_index) = &
+        fracture_property%change_perm_x
+      fracture_auxvar%vector(frac_change_perm_y_index) = &
+        fracture_property%change_perm_y
+      fracture_auxvar%vector(frac_change_perm_z_index) = &
+        fracture_property%change_perm_z
+    else
+      fracture_auxvar%fracture_is_on = PETSC_FALSE
+      fracture_auxvar%properties = UNINITIALIZED_DOUBLE
+      fracture_auxvar%vector = 0.d0
+    endif
+  endif
 
 end subroutine FracturePropertytoAux
 
@@ -160,6 +166,8 @@ subroutine FractureRead(this,input,option)
   type(input_type), pointer :: input
   type(option_type) :: option
   character(len=MAXWORDLENGTH) :: word
+
+  option%flow%fracture_on = PETSC_TRUE
   
   do
       call InputReadPflotranString(input,option)
@@ -224,11 +232,12 @@ subroutine FractureSetInitialPressure(fracture,initial_cell_pressure)
   type(fracture_auxvar_type) :: fracture
   PetscReal, intent(in) :: initial_cell_pressure
   
-  fracture%properties(frac_init_pres_index) = &
-    fracture%properties(frac_init_pres_index) + initial_cell_pressure
-  fracture%properties(frac_alt_pres_index) = &
-    fracture%properties(frac_alt_pres_index) + &
-    fracture%properties(frac_init_pres_index)
+  fracture%initial_pressure = initial_cell_pressure
+!  fracture%properties(frac_init_pres_index) = &
+!    fracture%properties(frac_init_pres_index) + initial_cell_pressure
+!  fracture%properties(frac_alt_pres_index) = &
+!    fracture%properties(frac_alt_pres_index) + &
+!    fracture%properties(frac_init_pres_index)
 
 end subroutine FractureSetInitialPressure
 
@@ -261,30 +270,46 @@ subroutine FracturePoroEvaluate(auxvar,pressure,compressed_porosity, &
   PetscReal :: P0, Pa, Pi
   PetscReal :: phia, phi0
 
-       ! convert bulk compressibility to pore compressibility
-  Ci = auxvar%soil_properties(soil_compressibility_index) / &
-       auxvar%porosity_base
-  P0 = auxvar%soil_properties(soil_reference_pressure_index)
-  Pa = auxvar%fracture%properties(frac_alt_pres_index)
-  Pi = auxvar%fracture%properties(frac_init_pres_index)
+  ! if fracture is off, still have to calculate soil compressiblity, if 
+  ! soil_compressibility_index > 0
+  if (.not.auxvar%fracture%fracture_is_on) then
+    ! soil_compressibility_index is a file global in material_aux.F90
+    if (soil_compressibility_index > 0) then
+      call MaterialCompressSoil(auxvar,pressure, compressed_porosity, &
+                                dcompressed_porosity_dp)
+    endif
+    return
+  endif
+
+
+  Ci = auxvar%soil_properties(soil_compressibility_index)
+  if (associated(MaterialCompressSoilPtr,MaterialCompressSoilBRAGFLO)) then
+    ! convert bulk compressibility to pore compressibility
+    Ci = auxvar%soil_properties(soil_compressibility_index) / &
+         auxvar%porosity_base
+  endif
+!  P0 = auxvar%soil_properties(soil_reference_pressure_index)
+  P0 = auxvar%fracture%initial_pressure
+  Pi = auxvar%fracture%properties(frac_init_pres_index) + P0
+  Pa = auxvar%fracture%properties(frac_alt_pres_index) + Pi
   phia = auxvar%fracture%properties(frac_max_poro_index)
   phi0 = auxvar%porosity_base
   
-  if (.not.associated(MaterialCompressSoilPtr, &
-                      MaterialCompressSoilBRAGFLO)) then
-    option%io_buffer = 'WIPP Fracture Function must be used with ' // &
-      'BRAGFLO soil compressibility function.'
-    call printErrMsg(option)
+  if (P0 < -998.d0) then ! not yet initialized
+    compressed_porosity = phi0
+    return
   endif
   
   if (pressure < Pi) then
-    call MaterialCompressSoil(auxvar,pressure, compressed_porosity, &
-                              dcompressed_porosity_dp)
-  else if (pressure > Pi .and. pressure < Pa) then
+!    call MaterialCompressSoil(auxvar,pressure, compressed_porosity, &
+!                              dcompressed_porosity_dp)
+    compressed_porosity = phi0 * exp(Ci*(pressure-P0))
+  else if (pressure < Pa) then
     Ca = Ci*(1.d0 - 2.d0 * (Pa-P0)/(Pa-Pi)) + &
       2.d0/(Pa-Pi)*log(phia/phi0)
     compressed_porosity = phi0 * exp(Ci*(pressure-P0) + &
       ((Ca-Ci)*(pressure-Pi)**2.d0)/(2.d0*(Pa-Pi)))
+    compressed_porosity=min(compressed_porosity, phia)
     !mathematica solution
     dcompressed_porosity_dp = exp(Ci*(pressure-P0) + &
       ((Ca-Ci)*(pressure-Pi)**2.d0) / (2.d0*(Pa-Pi))) * &
@@ -298,14 +323,14 @@ end subroutine FracturePoroEvaluate
 
 ! ************************************************************************** !
                                 
-subroutine FracturePermEvaluate(auxvar,permeability,altered_perm, &
-                                    daltered_perm_dp,dist)
+subroutine FracturePermScale(auxvar,liquid_pressure,effective_porosity, &
+                             scaling_factor)
   !
   ! Calculates permeability induced by fracture BRAGFLO_6.02_UM Eq. (136)
   ! 4.10 Pressure-Induced Fracture Treatment
   !
-  ! Author: Heeho Park
-  ! Date: 03/12/15
+  ! Author: Glenn Hammond
+  ! Date: 06/05/17
   !
 
   use Option_module
@@ -317,45 +342,54 @@ subroutine FracturePermEvaluate(auxvar,permeability,altered_perm, &
   
 !  class(fracture_type) :: this
   class(material_auxvar_type), intent(in) :: auxvar
-  PetscReal, intent(in) :: permeability
-  PetscReal, intent(out) :: altered_perm
-  PetscReal, intent(out) :: daltered_perm_dp
-  PetscReal :: dist(-1:3)
+  PetscReal, intent(in) :: liquid_pressure
+  PetscReal, intent(in) :: effective_porosity
+  PetscReal, intent(out) :: scaling_factor
 
-  PetscReal :: phii, n
+  PetscReal :: n
   PetscReal :: phi
+  PetscReal :: phi0
+  PetscReal :: phii
+  PetscReal :: phia
+  PetscReal :: Ci ! pore compressibility
+  PetscReal :: P0 ! initial pressure
+  PetscReal :: Pi ! initiating pressure
 
-  if (dot_product(dist(1:3),auxvar%fracture%vector) < 1.d-40) return
-  
-  phi = auxvar%porosity
-  phii = auxvar%porosity_base
+  if (.not.auxvar%fracture%fracture_is_on) then
+    scaling_factor = 1.d0
+    return
+  endif
+
+  Ci = auxvar%soil_properties(soil_compressibility_index)
+  if (associated(MaterialCompressSoilPtr,MaterialCompressSoilBRAGFLO)) then
+    ! convert bulk compressibility to pore compressibility
+    Ci = auxvar%soil_properties(soil_compressibility_index) / &
+         auxvar%porosity_base
+  endif
+  P0 = auxvar%fracture%initial_pressure
+  Pi = auxvar%fracture%properties(frac_init_pres_index) + P0
+
+  phi = effective_porosity
+  phi0 = auxvar%porosity_base
+
   n = auxvar%fracture%properties(frac_poro_exp_index)
 
-  if (.not.associated(MaterialCompressSoilPtr, &
-                      MaterialCompressSoilBRAGFLO)) then
-    option%io_buffer = 'WIPP Fracture Function must be used with ' // &
-      'BRAGFLO soil compressibility function.'
-    call printErrMsg(option)
+  if (P0 < -998.d0) then ! not yet initialized
+    scaling_factor = 1.d0
+    return
   endif
-  
+
   ! phi = altered porosity
   ! phii = porosity at initiating pressure
-  altered_perm = permeability * (phi/phii)**n
-  !the derivative ignored at this time since it requires additional parameters
-  !and calculations. we'll will need cell_pressure as an input and other 
-  !parameters used in MaterialFracturePorosityWIPP
-  daltered_perm_dp = 1.d-10
-  ! Mathematica solution
-  !Ca = Ci*(1.d0 - 2.d0 * (Pa-P0)/(Pa-Pi)) + &
-  !   2.d0/(Pa-Pi)*log(phia/phi0)
-  !a = exp(Ci*(pressure-P0) + &
-  !    ((Ca-Ci)*(pressure-Pi)**2.d0) / (2.d0*(Pa-Pi))) * &
-  !    phi0 * (Ci + ((Ca-Ci)*(pressure-Pi)) / (Pa-Pi))
-  !b = exp(Ci*(pressure-P0) + &
-  !    ((Ca-Ci)*(pressure-Pi)**2.d0) / (2.d0*(Pa-Pi)))
-  !daltered_perm_dp = a * permeability * n * (b*phi0/phii)**(n-1)
-  
-end subroutine FracturePermEvaluate
+  ! phia = porosity at fully altered
+  if (liquid_pressure < Pi) then
+    scaling_factor = 1.d0
+  else
+    phii = phi0 * exp(Ci*(Pi-P0))
+    scaling_factor = (phi/phii)**n
+  endif
+
+end subroutine FracturePermScale
 
 ! ************************************************************************** !
 
@@ -698,9 +732,12 @@ function CreepClosureGetID(creep_closure_array, &
   type(option_type) :: option
 
   PetscInt :: CreepClosureGetID
-  
+
   ! CreepClosureGetID = 1 is a null pointer (no creep closure)
   CreepClosureGetID = 1
+
+  if (len_trim(creep_closure_name) < 1) return
+  
   do CreepClosureGetID = 2, size(creep_closure_array)
     if (StringCompare(creep_closure_name, &
                       creep_closure_array( &
@@ -828,6 +865,7 @@ module Klinkenberg_module
   contains
     procedure, public :: Read => KlinkenbergRead
     procedure, public :: Evaluate => KlinkenbergEvaluate
+    procedure, public :: Scale => KlinkenbergScale
     procedure, public :: Test => KlinkenbergTest
   end type klinkenberg_type
   
@@ -941,7 +979,7 @@ end subroutine KlinkenbergRead
 
 ! ************************************************************************** !
 
-function KlinkenbergEvaluate(this,liquid_permeability,pressure)
+function KlinkenbergEvaluate(this,liquid_permeability,gas_pressure)
   ! 
   ! Author: Glenn Hammond
   ! Date: 10/13/14
@@ -949,23 +987,24 @@ function KlinkenbergEvaluate(this,liquid_permeability,pressure)
   implicit none
   
   class(klinkenberg_type) :: this
-  PetscReal :: liquid_permeability
-  PetscReal :: pressure
+  PetscReal :: liquid_permeability(3)
+  PetscReal :: gas_pressure
   
-  PetscReal :: KlinkenbergEvaluate
-  PetscReal :: gas_permeability
-  
-  gas_permeability = liquid_permeability * &
-                        (1.d0 + &
-                         this%b * (liquid_permeability**this%a) / &
-                           pressure)
-  KlinkenbergEvaluate = gas_permeability
+  PetscReal :: gas_permeability(3)
+  PetscReal :: perm_scale(3)
+
+  PetscReal :: KlinkenbergEvaluate(3)
+
+  call this%Scale(liquid_permeability,gas_pressure,perm_scale)
+  gas_permeability(:) = liquid_permeability(:) * perm_scale(:)
+  KlinkenbergEvaluate(:) = gas_permeability(:)
   
 end function KlinkenbergEvaluate
 
 ! ************************************************************************** !
 
-subroutine KlinkenbergTest(this,liquid_permeability,pressure)
+subroutine KlinkenbergScale(this,liquid_permeability,gas_pressure, &
+                          permeability_scale)
   ! 
   ! Author: Glenn Hammond
   ! Date: 10/13/14
@@ -973,13 +1012,36 @@ subroutine KlinkenbergTest(this,liquid_permeability,pressure)
   implicit none
   
   class(klinkenberg_type) :: this
-  PetscReal :: liquid_permeability
-  PetscReal :: pressure
+  PetscReal :: liquid_permeability(3) ! [m^2]
+  PetscReal :: gas_pressure ! [Pa]
+  PetscReal :: permeability_scale(3) ! [m^2]
   
-  print *, liquid_permeability, pressure, &
-           this%Evaluate(liquid_permeability,pressure)
+  PetscInt :: i
   
-end subroutine Klinkenbergtest
+  do i = 1, 3
+    permeability_scale(i) = (1.d0 + &
+                    this%b * (liquid_permeability(i)**this%a) / gas_pressure)
+  enddo
+  
+end subroutine KlinkenbergScale
+
+! ************************************************************************** !
+
+subroutine KlinkenbergTest(this,liquid_permeability,gas_pressure)
+  ! 
+  ! Author: Glenn Hammond
+  ! Date: 10/13/14
+  ! 
+  implicit none
+  
+  class(klinkenberg_type) :: this
+  PetscReal :: liquid_permeability(3)
+  PetscReal :: gas_pressure
+  
+  print *, liquid_permeability, gas_pressure, &
+           this%Evaluate(liquid_permeability,gas_pressure)
+  
+end subroutine KlinkenbergTest
 
 ! ************************************************************************** !
 

@@ -56,6 +56,7 @@ subroutine SubsurfAllocMatPropDataStructs(realization)
   use Grid_module
   use Patch_module
   use Material_Aux_class
+  use Fracture_module, only : FractureAuxVarInit
   
   implicit none
   
@@ -95,6 +96,9 @@ subroutine SubsurfAllocMatPropDataStructs(realization)
     allocate(material_auxvars(grid%ngmax))
     do ghosted_id = 1, grid%ngmax
       call MaterialAuxVarInit(material_auxvars(ghosted_id),option)
+      if (option%flow%fracture_on) then
+        call FractureAuxVarInit(material_auxvars(ghosted_id))
+      endif
     enddo
     cur_patch%aux%Material%num_aux = grid%ngmax
     cur_patch%aux%Material%auxvars => material_auxvars
@@ -243,6 +247,7 @@ subroutine InitSubsurfAssignMatProperties(realization)
   use WIPP_module
   use Creep_Closure_module
   use Fracture_module
+  use Geomechanics_Subsurface_Properties_module
   use Variables_module, only : PERMEABILITY_X, PERMEABILITY_Y, &
                                PERMEABILITY_Z, PERMEABILITY_XY, &
                                PERMEABILITY_YZ, PERMEABILITY_XZ, &
@@ -281,7 +286,8 @@ subroutine InitSubsurfAssignMatProperties(realization)
   PetscInt :: tempint
   PetscReal :: tempreal
   PetscErrorCode :: ierr
-  
+  PetscViewer :: viewer
+
   option => realization%option
   discretization => realization%discretization
   field => realization%field
@@ -319,11 +325,11 @@ subroutine InitSubsurfAssignMatProperties(realization)
     if (material_id > 0) then
       material_property => &
         patch%material_property_array(material_id)%ptr
-        
-      !if material is associated with fracture, then allocate memory.
-      call FractureAuxVarInit(material_property%fracture, &
-        patch%aux%Material%auxvars(ghosted_id))
       
+    call GeomechanicsSubsurfacePropsAuxvarInit( &
+          material_property%geomechanics_subsurface_properties, &
+          patch%aux%Material%auxvars(ghosted_id))
+        
       ! lookup creep closure table id from creep closure table name
       if (option%flow%creep_closure_on) then
         material_property%creep_closure_id = &
@@ -509,7 +515,18 @@ subroutine InitSubsurfAssignMatProperties(realization)
     call VecRestoreArrayF90(field%work_loc,vec_p,ierr);CHKERRQ(ierr)
   enddo
 
-  
+  if (option%geomech_on) then
+    call VecCopy(field%porosity0,field%porosity_geomech_store,ierr);CHKERRQ(ierr)
+#ifdef GEOMECH_DEBUG
+    print *, 'InitSubsurfAssignMatProperties'
+    call PetscViewerASCIIOpen(realization%option%mycomm, &
+                              'porosity_geomech_store_por0.out', &
+                              viewer,ierr);CHKERRQ(ierr)
+    call VecView(field%porosity_geomech_store,viewer,ierr);CHKERRQ(ierr)
+    call PetscViewerDestroy(viewer,ierr);CHKERRQ(ierr)
+#endif
+  endif
+
 end subroutine InitSubsurfAssignMatProperties
 
 ! ************************************************************************** !
@@ -982,6 +999,7 @@ subroutine InitSubsurfaceSetupZeroArrays(realization)
     end select
 #endif
     select case(option%iflowmode)
+      !TODO(geh): refactors so that we don't need all these variants?
       case(RICHARDS_MODE)
         call InitSubsurfaceCreateZeroArray(realization%patch,dof_is_active, &
                       realization%patch%aux%Richards%zero_rows_local, &
@@ -1009,6 +1027,13 @@ subroutine InitSubsurfaceSetupZeroArrays(realization)
                     realization%patch%aux%General%inactive_rows_local_ghosted, &
                       realization%patch%aux%General%n_inactive_rows, &
                       realization%patch%aux%General%inactive_cells_exist, &
+                      option)
+      case(WF_MODE)
+        call InitSubsurfaceCreateZeroArray(realization%patch,dof_is_active, &
+                      realization%patch%aux%WIPPFlo%inactive_rows_local, &
+                    realization%patch%aux%WIPPFlo%inactive_rows_local_ghosted, &
+                      realization%patch%aux%WIPPFlo%n_inactive_rows, &
+                      realization%patch%aux%WIPPFlo%inactive_cells_exist, &
                       option)
       case(TOIL_IMS_MODE)
         call InitSubsurfaceCreateZeroArray(realization%patch,dof_is_active, &

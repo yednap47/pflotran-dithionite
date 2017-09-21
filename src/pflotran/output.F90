@@ -973,6 +973,24 @@ subroutine OutputVariableRead(input,option,output_variable_list)
         call OutputVariableAddToList(output_variable_list,name, &
                                      OUTPUT_GENERIC,units, &
                                      PERMEABILITY_Z)
+      case ('GAS_PERMEABILITY','GAS_PERMEABILITY_X')
+        units = 'm^2'
+        name = 'Gas Permeability X'
+        call OutputVariableAddToList(output_variable_list,name, &
+                                     OUTPUT_GENERIC,units, &
+                                     GAS_PERMEABILITY)
+      case ('GAS_PERMEABILITY_Y')
+        units = 'm^2'
+        name = 'Gas Permeability Y'
+        call OutputVariableAddToList(output_variable_list,name, &
+                                     OUTPUT_GENERIC,units, &
+                                     GAS_PERMEABILITY_Y)
+      case ('GAS_PERMEABILITY_Z')
+        units = 'm^2'
+        name = 'Gas Permeability Z'
+        call OutputVariableAddToList(output_variable_list,name, &
+                                     OUTPUT_GENERIC,units, &
+                                     GAS_PERMEABILITY_Z)
       case ('SOIL_COMPRESSIBILITY')
         units = ''
         name = 'Compressibility'
@@ -1015,6 +1033,13 @@ subroutine OutputVariableRead(input,option,output_variable_list)
         output_variable => OutputVariableCreate(name,OUTPUT_DISCRETE, &
                                                 units,MATERIAL_ID)
         output_variable%plot_only = PETSC_TRUE ! toggle output off for observation
+        output_variable%iformat = 1 ! integer
+        call OutputVariableAddToList(output_variable_list,output_variable)
+      case ('FRACTURE')
+        units = ''
+        name = 'Fracture Flag'
+        output_variable => OutputVariableCreate(name,OUTPUT_DISCRETE, &
+                                                units,FRACTURE)
         output_variable%iformat = 1 ! integer
         call OutputVariableAddToList(output_variable_list,output_variable)
       case ('MATERIAL_ID_KLUDGE_FOR_VISIT')
@@ -1985,6 +2010,7 @@ subroutine OutputPrintCouplers(realization_base,istep)
   use Grid_module
   use Input_Aux_module
   use General_Aux_module
+  use WIPP_Flow_Aux_module
 
   class(realization_base_type) :: realization_base
   PetscInt :: istep
@@ -2026,6 +2052,12 @@ subroutine OutputPrintCouplers(realization_base,istep)
       auxvar_names(1) = 'liquid_pressure'
       iauxvars(2) = GENERAL_ENERGY_DOF
       auxvar_names(2) = 'temperature'
+    case(WF_MODE)
+      allocate(iauxvars(2),auxvar_names(2))
+      iauxvars(1) = GENERAL_LIQUID_PRESSURE_DOF
+      auxvar_names(1) = 'liquid_pressure'
+      iauxvars(2) = GENERAL_ENERGY_DOF
+      auxvar_names(2) = 'gas_saturation'
     case default
       option%io_buffer = &
         'OutputPrintCouplers() not yet supported for this flow mode'

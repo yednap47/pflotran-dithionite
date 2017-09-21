@@ -74,6 +74,7 @@ module PM_Subsurface_Flow_class
             PMSubsurfaceFlowUpdateSolution, &
             PMSubsurfaceFlowUpdatePropertiesNI, &
             PMSubsurfaceFlowTimeCut, &
+            PMSubsurfaceFlowTimeCutPostInit, &
             PMSubsurfaceFlowCheckpointBinary, &
             PMSubsurfaceFlowRestartBinary, &
             PMSubsurfaceFlowReadSelectCase, &
@@ -214,13 +215,16 @@ subroutine PMSubsurfaceFlowSetup(this)
   use Discretization_module
   use Communicator_Structured_class
   use Communicator_Unstructured_class
-  use Grid_module 
+  use Grid_module
+  use Characteristic_Curves_module
+  use Option_module
 
   implicit none
   
   class(pm_subsurface_flow_type) :: this
   
   PetscErrorCode :: ierr
+  class(characteristic_curves_type), pointer :: cur_cc
 
   ! set the communicator
   this%comm1 => this%realization%comm1
@@ -238,6 +242,30 @@ subroutine PMSubsurfaceFlowSetup(this)
     if (this%option%ntrandof > 0) then
       this%store_porosity_for_transport = PETSC_TRUE
     endif
+  endif
+  
+  ! check on WIPP_type characteristic curves against simulation mode
+  if (this%option%iflowmode /= 10) then   ! 10 = twophase_mode
+    cur_cc => this%realization%characteristic_curves
+    do
+      if (.not.associated(cur_cc)) exit
+      select type(sf => cur_cc%saturation_function)
+        class is(sat_func_WIPP_type)
+          if (.not.sf%ignore_permeability .and. &
+              .not.(this%option%iflowmode == WF_MODE .or. &
+                    this%option%iflowmode == G_MODE)) then
+            this%option%io_buffer = 'A WIPP capillary pressure - saturation &
+              &function (' // trim(cur_cc%name) // ') is being used without &
+              &the IGNORE_PERMEABILITY feature in a flow mode &
+              &that does not support the permeability feature. &
+              &Please chose a different mode, such as General Mode or &
+              &WIPP Flow Mode, or use &
+              &the IGNORE_PERMEABILITY feature, and provide ALPHA.'
+            call printErrMsg(this%option)
+          endif
+      end select
+      cur_cc => cur_cc%next
+    enddo
   endif
   
 end subroutine PMSubsurfaceFlowSetup
@@ -284,7 +312,7 @@ recursive subroutine PMSubsurfaceFlowInitializeRun(this)
   PetscBool :: update_initial_porosity
 
   ! must come before RealizUnInitializedVarsTran
-  call RealizSetSoilReferencePressure(this%realization)
+  call PMSubsurfaceFlowSetSoilRefPres(this%realization)
   ! check for uninitialized flow variables
   call RealizUnInitializedVarsTran(this%realization)
 
@@ -339,6 +367,142 @@ recursive subroutine PMSubsurfaceFlowInitializeRun(this)
 end subroutine PMSubsurfaceFlowInitializeRun
 
 ! ************************************************************************** !
+
+subroutine PMSubsurfaceFlowSetSoilRefPres(realization)
+  ! 
+  ! Deallocates a realization
+  ! 
+  ! Author: Glenn Hammond
+  ! Date: 07/06/16
+  ! 
+  use Realization_Subsurface_class
+  use Realization_Base_class
+  use Patch_module
+  use Discretization_module
+  use Grid_module
+  use Material_Aux_class
+  use Material_module
+  use HDF5_module
+  use Dataset_Base_class
+  use Dataset_Common_HDF5_class
+  use Dataset_Gridded_HDF5_class
+  use Fracture_module
+  use Variables_module, only : MAXIMUM_PRESSURE, LIQUID_PRESSURE, & 
+                      SOIL_REFERENCE_PRESSURE 
+
+  implicit none
+
+  type(realization_subsurface_type) :: realization
+  type(patch_type), pointer :: patch
+  type(grid_type), pointer :: grid
+  class(material_auxvar_type), pointer :: material_auxvars(:)
+  type(material_type), pointer :: Material
+  type(material_property_ptr_type), pointer :: material_property_array(:)
+  type(material_property_type), pointer :: material_property
+  type(option_type), pointer :: option
+  PetscReal, pointer :: vec_loc_p(:)
+
+  PetscInt :: ghosted_id
+  PetscInt :: material_id
+  PetscErrorCode :: ierr
+  PetscBool :: ref_pres_set_by_initial
+  Vec :: vec_int_ptr
+  Vec :: dataset_vec
+  character(len=MAXSTRINGLENGTH) :: group_name
+  character(len=MAXSTRINGLENGTH) :: dataset_name
+
+  option => realization%option
+  patch => realization%patch
+  grid => patch%grid
+  material_property_array => patch%material_property_array
+  material_auxvars => patch%aux%Material%auxvars
+
+  dataset_vec = PETSC_NULL_VEC
+  
+  if(option%iflowmode == WF_MODE) then
+    call RealizationGetVariable(realization,realization%field%work, &
+                                LIQUID_PRESSURE,ZERO_INTEGER)
+  else
+    call RealizationGetVariable(realization,realization%field%work, &
+                                MAXIMUM_PRESSURE,ZERO_INTEGER)
+  endif
+  
+  call DiscretizationGlobalToLocal(realization%discretization, &
+                                   realization%field%work, &
+                                   realization%field%work_loc, &
+                                   ONEDOF)
+  call VecGetArrayReadF90(realization%field%work_loc,vec_loc_p, &
+                          ierr); CHKERRQ(ierr)
+
+  ref_pres_set_by_initial = PETSC_FALSE
+  ! read in any user-defined property fields
+  do material_id = 1, size(patch%material_property_array)
+    material_property => &
+            patch%material_property_array(material_id)%ptr
+    if (.not.associated(material_property)) cycle
+    if (associated(material_property%soil_reference_pressure_dataset)) then
+      if (dataset_vec == PETSC_NULL_VEC) then
+        call DiscretizationDuplicateVector(realization%discretization, &
+                                           realization%field%work_loc, &
+                                           dataset_vec)
+      endif
+      call VecZeroEntries(realization%field%work,ierr)
+      vec_int_ptr = dataset_vec
+      select type(dataset => material_property%soil_reference_pressure_dataset)
+        class is(dataset_gridded_hdf5_type)
+          option%io_buffer = 'Gridded dataset "' // trim(dataset%name) // &
+            ' not yet suppored in RealizSetSoilReferencePressure().'
+          call printErrMsg(option)
+        class is(dataset_common_hdf5_type)
+          dataset_name = dataset%hdf5_dataset_name
+          group_name = ''
+          call HDF5ReadCellIndexedRealArray(realization, &
+                                            realization%field%work, &
+                                            dataset%filename, &
+                                            group_name,dataset_name, &
+                                            dataset%realization_dependent)
+        class default
+          option%io_buffer = 'Dataset "' // trim(dataset%name) // '" is of the &
+            &wrong type for RealizSetSoilReferencePressure()'
+          call printErrMsg(option)
+      end select
+      call DiscretizationGlobalToLocal(realization%discretization, &
+                                       realization%field%work, &
+                                       dataset_vec,ONEDOF)
+    else if (material_property%soil_reference_pressure_initial) then
+      vec_int_ptr = realization%field%work_loc
+      ref_pres_set_by_initial = PETSC_TRUE
+    else
+      cycle
+    endif
+    call VecGetArrayReadF90(vec_int_ptr,vec_loc_p,ierr); CHKERRQ(ierr)
+    do ghosted_id = 1, grid%ngmax
+      if (patch%imat(ghosted_id) /= material_property%internal_id) cycle
+      if (associated(material_auxvars(ghosted_id)%fracture)) then
+        call FractureSetInitialPressure(material_auxvars(ghosted_id)%fracture, &
+                                        vec_loc_p(ghosted_id))
+      endif
+      call MaterialAuxVarSetValue(material_auxvars(ghosted_id), &
+                                  SOIL_REFERENCE_PRESSURE, &
+                                  vec_loc_p(ghosted_id))
+    enddo
+    call VecRestoreArrayReadF90(vec_int_ptr,vec_loc_p,ierr); CHKERRQ(ierr)
+  enddo
+
+  if (ref_pres_set_by_initial .and. option%time > 0.d0) then
+    option%io_buffer = 'Restarted simulations (restarted with time > 0) &
+      &that set reference pressure based on the initial pressure will be &
+      &incorrect as the initial pressure is not stored in a checkpoint file.'
+    call printErrMsg(option)
+  endif
+
+  if (dataset_vec /= PETSC_NULL_VEC) then
+    call VecDestroy(dataset_vec,ierr);CHKERRQ(ierr)
+  endif
+
+end subroutine PMSubsurfaceFlowSetSoilRefPres
+
+! ************************************************************************** !
 #ifdef WELL_CLASS
 subroutine AllWellsInit(this)
   !
@@ -390,7 +554,7 @@ subroutine PMSubsurfaceFlowInitializeTimestepA(this)
   use Variables_module, only : POROSITY, PERMEABILITY_X, &
                                PERMEABILITY_Y, PERMEABILITY_Z
   use Material_module
-  use Material_Aux_class, only : POROSITY_MINERAL
+  use Material_Aux_class, only : POROSITY_MINERAL, POROSITY_CURRENT
   
   implicit none
   
@@ -406,6 +570,17 @@ subroutine PMSubsurfaceFlowInitializeTimestepA(this)
     call this%comm1%LocalToGlobal(this%realization%field%work_loc, &
                                   this%realization%field%porosity_base_store)
   endif
+
+  if (this%option%ngeomechdof > 0) then
+    ! store base properties for reverting at time step cut
+    call MaterialGetAuxVarVecLoc(this%realization%patch%aux%Material, &
+                                 this%realization%field%work_loc,POROSITY, &
+                                 POROSITY_CURRENT)
+    call this%comm1%LocalToGlobal(this%realization%field%work_loc, &
+                                  this%realization%field%porosity_base_store)
+                                 
+  endif
+
 
 end subroutine PMSubsurfaceFlowInitializeTimestepA
 
@@ -425,6 +600,8 @@ subroutine PMSubsurfaceFlowInitializeTimestepB(this)
   implicit none
   
   class(pm_subsurface_flow_type) :: this
+  PetscViewer :: viewer
+PetscErrorCode :: ierr
 
   if (this%option%ntrandof > 0) then ! store initial saturations for transport
     call GlobalUpdateAuxVars(this%realization,TIME_T,this%option%time)
@@ -448,9 +625,31 @@ subroutine PMSubsurfaceFlowInitializeTimestepB(this)
     endif
   endif
 
+  if (this%option%ngeomechdof > 0) then
+#ifdef GEOMECH_DEBUG
+    print *, 'PMSubsurfaceFlowInitializeTimestepB'
+#endif
+    call this%comm1%GlobalToLocal(this%realization%field%porosity_geomech_store, &
+                                  this%realization%field%work_loc)
+    ! push values to porosity_current
+    call MaterialSetAuxVarVecLoc(this%realization%patch%aux%Material, &
+                                 this%realization%field%work_loc, &
+                                 POROSITY,POROSITY_CURRENT)
+
+#ifdef GEOMECH_DEBUG
+    call PetscViewerASCIIOpen(PETSC_COMM_SELF, &
+                              'porosity_geomech_store_timestep.out', &
+                              viewer,ierr);CHKERRQ(ierr)
+    call VecView(this%realization%field%porosity_geomech_store,viewer, &
+                 ierr);CHKERRQ(ierr)
+    call PetscViewerDestroy(viewer,ierr);CHKERRQ(ierr)
+#endif
+
+  endif
+
 #ifdef WELL_CLASS
   call this%AllWellsUpdate()
-#endif  
+#endif
 
 end subroutine PMSubsurfaceFlowInitializeTimestepB
 
@@ -579,7 +778,7 @@ subroutine PMSubsurfaceFlowTimeCut(this)
   ! Date: 04/21/14 
   use Material_module
   use Variables_module, only : POROSITY
-  use Material_Aux_class, only : POROSITY_MINERAL
+  use Material_Aux_class, only : POROSITY_MINERAL, POROSITY_CURRENT
   
   implicit none
   
@@ -597,9 +796,45 @@ subroutine PMSubsurfaceFlowTimeCut(this)
     call MaterialSetAuxVarVecLoc(this%realization%patch%aux%Material, &
                                  this%realization%field%work_loc,POROSITY, &
                                  POROSITY_MINERAL)
-  endif             
+  endif            
+  if (this%option%ngeomechdof > 0) then
+    call this%comm1%GlobalToLocal(this%realization%field%porosity_base_store, &
+                                  this%realization%field%work_loc)
+    call MaterialSetAuxVarVecLoc(this%realization%patch%aux%Material, &
+                                 this%realization%field%work_loc,POROSITY, &
+                                 POROSITY_CURRENT)
+ endif 
+
 
 end subroutine PMSubsurfaceFlowTimeCut
+
+! ************************************************************************** !
+
+subroutine PMSubsurfaceFlowTimeCutPostInit(this)
+  ! 
+  ! Author: Satish Karra
+  ! Date: 08/23/17
+  use Material_module
+  use Variables_module, only : POROSITY
+  use Material_Aux_class, only : POROSITY_CURRENT
+  
+  implicit none
+  
+  class(pm_subsurface_flow_type) :: this
+  
+  PetscErrorCode :: ierr
+  
+  this%option%flow_dt = this%option%dt
+           
+  if (this%option%ngeomechdof > 0) then
+    call this%comm1%GlobalToLocal(this%realization%field%porosity_geomech_store, &
+                                  this%realization%field%work_loc)
+    call MaterialSetAuxVarVecLoc(this%realization%patch%aux%Material, &
+                                 this%realization%field%work_loc,POROSITY, &
+                                 POROSITY_CURRENT)
+ endif 
+
+end subroutine PMSubsurfaceFlowTimeCutPostInit
 
 ! ************************************************************************** !
 

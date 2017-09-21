@@ -37,6 +37,7 @@ module Material_Aux_class
     PetscReal, pointer :: sat_func_prop(:)
     PetscReal, pointer :: soil_properties(:) ! den, therm. cond., heat cap.
     type(fracture_auxvar_type), pointer :: fracture
+    PetscReal, pointer :: geomechanics_subsurface_prop(:)
     PetscInt :: creep_closure_id
 
 !    procedure(SaturationFunction), nopass, pointer :: SaturationFunction
@@ -46,10 +47,12 @@ module Material_Aux_class
   end type material_auxvar_type
   
   type, public :: fracture_auxvar_type
-    PetscReal, pointer :: properties(:)
-    PetscReal, pointer :: vector(:) ! < 0. 0. 0. >
+    PetscBool :: fracture_is_on
+    PetscReal :: initial_pressure
+    PetscReal :: properties(4)
+    PetscReal :: vector(3) ! < 0. 0. 0. >
   end type fracture_auxvar_type
-  
+ 
   type, public :: material_parameter_type
     PetscReal, pointer :: soil_residual_saturation(:,:)
     PetscReal, pointer :: soil_heat_capacity(:) ! MJ/kg rock-K
@@ -88,7 +91,9 @@ module Material_Aux_class
             MaterialCompressSoilPtr, &
             MaterialCompressSoil, &
             MaterialCompressSoilBragflo, &
+            MaterialCompressSoilPoroExp, &
             MaterialCompressSoilLeijnse, &
+            MaterialCompressSoilLinear, &
             MaterialCompressSoilQuadratic
   
   public :: MaterialAuxCreate, &
@@ -98,7 +103,8 @@ module Material_Aux_class
             MaterialAuxVarGetValue, &
             MaterialAuxVarSetValue, &
             MaterialAuxIndexToPropertyName, &
-            MaterialAuxDestroy
+            MaterialAuxDestroy, &
+            MaterialAuxVarFractureStrip
   
 contains
 
@@ -405,6 +411,7 @@ subroutine MaterialCompressSoilBRAGFLO(auxvar,pressure, &
   
   PetscReal :: compressibility
   
+
   ! convert to pore compressiblity by dividing by base porosity
   compressibility = auxvar%soil_properties(soil_compressibility_index) / &
                     auxvar%porosity_base
@@ -414,6 +421,66 @@ subroutine MaterialCompressSoilBRAGFLO(auxvar,pressure, &
   dcompressed_porosity_dp = compressibility * compressed_porosity
   
 end subroutine MaterialCompressSoilBRAGFLO
+
+! ************************************************************************** !
+
+subroutine MaterialCompressSoilLinear(auxvar,pressure, &
+                                      compressed_porosity, &
+                                      dcompressed_porosity_dp)
+  ! 
+  ! Calculates soil matrix compression for standard constant 
+  ! aquifer compressibility
+  !
+  ! variable 'alpha' is Freeze and Cherry, 1982
+  ! 
+  ! Author: Danny Birdsell and Satish Karra
+  ! Date: 07/26/2016
+  ! 
+
+  implicit none
+
+  class(material_auxvar_type), intent(in) :: auxvar
+  PetscReal, intent(in) :: pressure
+  PetscReal, intent(out) :: compressed_porosity
+  PetscReal, intent(out) :: dcompressed_porosity_dp
+  
+  PetscReal :: compressibility
+  
+  compressibility = auxvar%soil_properties(soil_compressibility_index)
+  compressed_porosity = auxvar%porosity_base + compressibility * &
+            (pressure - auxvar%soil_properties(soil_reference_pressure_index)) 
+  dcompressed_porosity_dp = compressibility
+
+end subroutine MaterialCompressSoilLinear
+
+! ************************************************************************** !
+
+subroutine MaterialCompressSoilPoroExp(auxvar,pressure, &
+                                       compressed_porosity, &
+                                       dcompressed_porosity_dp)
+  ! 
+  ! Calculates soil matrix compression based on Eq. 9.6.9 of BRAGFLO
+  ! 
+  ! Author: Glenn Hammond
+  ! Date: 01/14/14
+  ! 
+
+  implicit none
+
+  class(material_auxvar_type), intent(in) :: auxvar
+  PetscReal, intent(in) :: pressure
+  PetscReal, intent(out) :: compressed_porosity
+  PetscReal, intent(out) :: dcompressed_porosity_dp
+  
+  PetscReal :: compressibility
+  
+  compressibility = auxvar%soil_properties(soil_compressibility_index)
+  compressed_porosity = auxvar%porosity_base * &
+    exp(compressibility * &
+        (pressure - auxvar%soil_properties(soil_reference_pressure_index)))
+  dcompressed_porosity_dp = compressibility * compressed_porosity
+  
+end subroutine MaterialCompressSoilPoroExp
 
 ! ************************************************************************** !
 
@@ -483,6 +550,29 @@ end function MaterialAuxIndexToPropertyName
 
 ! ************************************************************************** !
 
+subroutine MaterialAuxVarFractureStrip(fracture)
+  ! 
+  ! Deallocates a fracture auxiliary object
+  ! 
+  ! Author: Glenn Hammond
+  ! Date: 06/14/17
+  ! 
+  use Utility_module, only : DeallocateArray
+  
+  implicit none
+
+  type(fracture_auxvar_type), pointer :: fracture
+
+  if (.not.associated(fracture)) return
+
+  ! properties and vector are now static arrays.
+  deallocate(fracture)
+  nullify(fracture)
+  
+end subroutine MaterialAuxVarFractureStrip
+
+! ************************************************************************** !
+
 subroutine MaterialAuxVarStrip(auxvar)
   ! 
   ! Deallocates a material auxiliary object
@@ -490,7 +580,6 @@ subroutine MaterialAuxVarStrip(auxvar)
   ! Author: Glenn Hammond
   ! Date: 01/09/14
   ! 
-
   use Utility_module, only : DeallocateArray
   
   implicit none
@@ -500,6 +589,7 @@ subroutine MaterialAuxVarStrip(auxvar)
   call DeallocateArray(auxvar%permeability)
   call DeallocateArray(auxvar%sat_func_prop)
   call DeallocateArray(auxvar%soil_properties)
+  call MaterialAuxVarFractureStrip(auxvar%fracture)
   
 end subroutine MaterialAuxVarStrip
 
@@ -512,6 +602,7 @@ subroutine MaterialAuxDestroy(aux)
   ! Author: Glenn Hammond
   ! Date: 03/02/11
   ! 
+  use Utility_module, only : DeallocateArray
 
   implicit none
 
@@ -530,16 +621,9 @@ subroutine MaterialAuxDestroy(aux)
   nullify(aux%auxvars)
     
   if (associated(aux%material_parameter)) then
-    if (associated(aux%material_parameter%soil_residual_saturation)) &
-      deallocate(aux%material_parameter%soil_residual_saturation)
-    nullify(aux%material_parameter%soil_residual_saturation)
-    if (associated(aux%material_parameter%soil_heat_capacity)) &
-      deallocate(aux%material_parameter%soil_heat_capacity)
-    nullify(aux%material_parameter%soil_heat_capacity)
-    if (associated(aux%material_parameter%soil_thermal_conductivity)) &
-      deallocate(aux%material_parameter%soil_thermal_conductivity)
-    nullify(aux%material_parameter%soil_thermal_conductivity)
-    deallocate(aux%material_parameter)
+    call DeallocateArray(aux%material_parameter%soil_residual_saturation)
+    call DeallocateArray(aux%material_parameter%soil_heat_capacity)
+    call DeallocateArray(aux%material_parameter%soil_thermal_conductivity)
   endif
   nullify(aux%material_parameter)
   

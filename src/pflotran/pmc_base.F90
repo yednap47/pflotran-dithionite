@@ -257,9 +257,9 @@ recursive subroutine PMCBaseSetChildPeerPtr(pmcA,relationship_to,pmcB, &
       else
         pmcB%child => pmcA
 #ifdef DEBUG
-        option%io_buffer = trim(pmcA%name)// ' assigned as first child of ' // &
-                           trim(pmcB%name) // '.'
-        call printMsg(option)
+        pmcA%option%io_buffer = trim(pmcA%name)// ' assigned as first child&
+                                & of ' // trim(pmcB%name) // '.'
+        call printMsg(pmcA%option)
 #endif
       endif
   !--------------------------------------------------------
@@ -274,8 +274,8 @@ recursive subroutine PMCBaseSetChildPeerPtr(pmcA,relationship_to,pmcB, &
           else
             pmcB%peer => pmcA
 #ifdef DEBUG
-        option%io_buffer = trim(pmcA%name) // ' assigned as peer of ' // &
-                           trim(pmcB%name) // ' via "append".'
+        pmcA%option%io_buffer = trim(pmcA%name) // ' assigned as peer of ' // &
+                                trim(pmcB%name) // ' via "append".'
         call printMsg(option)
 #endif
           endif
@@ -285,8 +285,8 @@ recursive subroutine PMCBaseSetChildPeerPtr(pmcA,relationship_to,pmcB, &
           if (associated(pmcB_parent)) then
             pmcB_parent%child => pmcA
 #ifdef DEBUG
-        option%io_buffer = trim(pmcA%name)// ' assigned as first child of ' // &
-                           trim(pmcB%name) // ' via "insert".'
+        pmcA%option%io_buffer = trim(pmcA%name)// ' assigned as first child&
+                                & of ' // trim(pmcB%name) // ' via "insert".'
         call printMsg(option)
 #endif
           else
@@ -443,8 +443,11 @@ recursive subroutine PMCBaseRunToTime(this,sync_time,stop_flag)
   PetscBool :: snapshot_plot_at_this_timestep_flag
   PetscBool :: observation_plot_at_this_timestep_flag
   PetscBool :: massbal_plot_at_this_timestep_flag
+  PetscBool :: peer_already_run_to_time
   class(pm_base_type), pointer :: cur_pm
   PetscErrorCode :: ierr
+
+  if (stop_flag == TS_STOP_FAILURE) return
 
   if (this%stage /= 0) then
     call PetscLogStagePush(this%stage,ierr);CHKERRQ(ierr)
@@ -546,6 +549,9 @@ recursive subroutine PMCBaseRunToTime(this,sync_time,stop_flag)
       endif
     endif
 
+    ! Checkpointing forces peers to be executed prior to the checkpoing.  If
+    ! so, we need to skip the peer RunToTime outside the loop
+    peer_already_run_to_time = PETSC_FALSE
     if (this%is_master .and. &
         (checkpoint_at_this_time_flag .or. &
          checkpoint_at_this_timestep_flag)) then
@@ -556,6 +562,7 @@ recursive subroutine PMCBaseRunToTime(this,sync_time,stop_flag)
       ! Run neighboring process model couplers
       if (associated(this%peer)) then
         call this%peer%RunToTime(this%timestepper%target_time,local_stop_flag)
+        peer_already_run_to_time = PETSC_TRUE
       endif
       call this%GetAuxData()
       ! it is possible that two identical checkpoint files will be created,
@@ -587,7 +594,7 @@ recursive subroutine PMCBaseRunToTime(this,sync_time,stop_flag)
   call this%SetAuxData()
 
   ! Run neighboring process model couplers
-  if (associated(this%peer)) then
+  if (associated(this%peer) .and. .not.peer_already_run_to_time) then
     call this%peer%RunToTime(sync_time,local_stop_flag)
   endif
   

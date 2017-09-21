@@ -96,6 +96,7 @@ subroutine PMCSubsurfaceSetupSolvers(this)
   use PM_Base_class
   use PM_Subsurface_Flow_class
   use PM_General_class
+  use PM_WIPP_Flow_class
   use PM_Richards_class
   use PM_TH_class
   use PM_RT_class
@@ -157,8 +158,11 @@ subroutine PMCSubsurfaceSetupSolvers(this)
                 case(TH_MODE)
                   write(*,'(" mode = TH: p, T")')
                 case(RICHARDS_MODE)
-                  write(*,'(" mode = Richards: p")')  
+                  write(*,'(" mode = Richards: p")')
                 case(G_MODE) 
+                  write(*,'(" mode = General: p, sg/X, T")')
+                case(WF_MODE) 
+                  write(*,'(" mode = WIPP Flow: p, sg")')
                 case(TOIL_IMS_MODE)   
               end select
             endif
@@ -248,6 +252,7 @@ subroutine PMCSubsurfaceSetupSolvers(this)
             endif
             select type(pm)
             !-------------------------------------
+              !TODO(geh): Can't these be consolidated?
               class is(pm_richards_type)
                 if (Initialized(pm%pressure_dampening_factor) .or. &
                     Initialized(pm%saturation_change_limit)) then
@@ -263,6 +268,17 @@ subroutine PMCSubsurfaceSetupSolvers(this)
                 endif   
             !-------------------------------------
               class is(pm_general_type)
+                call SNESLineSearchSetPreCheck(linesearch, &
+#if defined(USE_PM_AS_PETSC_CONTEXT)
+                                               PMCheckUpdatePre, &
+                                               this%pm_ptr%pm, &
+#else
+                                               PMCheckUpdatePrePtr, &
+                                               this%pm_ptr, &
+#endif
+                                               ierr);CHKERRQ(ierr)
+            !-------------------------------------
+              class is(pm_wippflo_type)
                 call SNESLineSearchSetPreCheck(linesearch, &
 #if defined(USE_PM_AS_PETSC_CONTEXT)
                                                PMCheckUpdatePre, &
@@ -883,7 +899,7 @@ subroutine PMCSubsurfaceGetAuxDataFromGeomech(this)
 
 #include "petsc/finclude/petscvec.h"
   use petscvec
-  use Discretization_module, only : DiscretizationLocalToLocal
+  use Discretization_module, only : DiscretizationLocalToGlobal
   use Field_module
   use Grid_module
   use Option_module
@@ -902,6 +918,7 @@ subroutine PMCSubsurfaceGetAuxDataFromGeomech(this)
   type(field_type), pointer :: subsurf_field
 
   PetscScalar, pointer :: sim_por_p(:)
+  PetscScalar, pointer :: work_loc_p(:)
   class(material_auxvar_type), pointer :: subsurf_material_auxvars(:)
 
   PetscInt :: local_id
@@ -909,6 +926,10 @@ subroutine PMCSubsurfaceGetAuxDataFromGeomech(this)
 
   PetscErrorCode :: ierr
   PetscViewer :: viewer
+
+#ifdef GEOMECH_DEBUG
+  print *, 'PMCSubsurfaceGetAuxDataFromGeomech()'
+#endif
 
   if (associated(this%sim_aux)) then
     select type (pmc => this)
@@ -918,43 +939,35 @@ subroutine PMCSubsurfaceGetAuxDataFromGeomech(this)
         subsurf_field => pmc%realization%field
         subsurf_material_auxvars => pmc%realization%patch%aux%Material%auxvars
 
-        if (pmc%timestepper%steps == 0) return
-
         if (option%geomech_subsurf_coupling == GEOMECH_TWO_WAY_COUPLED) then
 
-          call VecGetArrayF90(pmc%sim_aux%subsurf_por, sim_por_p,  &
+          call VecGetArrayF90(pmc%sim_aux%subsurf_por,sim_por_p,  &
+                              ierr);CHKERRQ(ierr)
+          call VecGetArrayF90(subsurf_field%work_loc,work_loc_p,  &
                               ierr);CHKERRQ(ierr)
 
           do local_id = 1, subsurf_grid%nlmax
             ghosted_id = subsurf_grid%nL2G(local_id)
-            subsurf_material_auxvars(ghosted_id)%porosity = sim_por_p(local_id)
+            work_loc_p(ghosted_id) = sim_por_p(local_id)
           enddo
-
-          call VecRestoreArrayF90(pmc%sim_aux%subsurf_por, sim_por_p,  &
+            
+          call VecRestoreArrayF90(pmc%sim_aux%subsurf_por,sim_por_p,  &
                                   ierr);CHKERRQ(ierr)
+          call VecRestoreArrayF90(subsurf_field%work_loc,work_loc_p,  &
+                              ierr);CHKERRQ(ierr)
 
-!          call PetscViewerBinaryOpen(pmc%realization%option%mycomm, &
-!                                     'por_before.bin',FILE_MODE_WRITE,viewer, &
-!                                     ierr);CHKERRQ(ierr)
-          call MaterialGetAuxVarVecLoc(pmc%realization%patch%aux%Material, &
-                                       subsurf_field%work_loc, &
-                                       POROSITY,ZERO_INTEGER)
-
-!          call VecView(subsurf_field%work_loc,viewer,ierr);CHKERRQ(ierr)
-!          call PetscViewerDestroy(viewer,ierr);CHKERRQ(ierr)
-
-          call DiscretizationLocalToLocal(pmc%realization%discretization, &
+          call DiscretizationLocalToGlobal(pmc%realization%discretization, &
                                           subsurf_field%work_loc, &
-                                          subsurf_field%work_loc,ONEDOF)
-!          call PetscViewerBinaryOpen(pmc%realization%option%mycomm, &
-!                                     'por_after.bin',FILE_MODE_WRITE,viewer, &
-!                                     ierr);CHKERRQ(ierr)
-!          call VecView(subsurf_field%work_loc,viewer,ierr);CHKERRQ(ierr)
-!          call PetscViewerDestroy(viewer,ierr);CHKERRQ(ierr)
+                                          subsurf_field%porosity_geomech_store, &
+                                          ONEDOF)
+#ifdef GEOMECH_DEBUG
+          call PetscViewerASCIIOpen(pmc%realization%option%mycomm, &
+                                    'porosity_geomech_store.out', &
+                                    viewer,ierr);CHKERRQ(ierr)
+          call VecView(subsurf_field%porosity_geomech_store,viewer,ierr);CHKERRQ(ierr)
+          call PetscViewerDestroy(viewer,ierr);CHKERRQ(ierr)
+#endif
 
-          call MaterialSetAuxVarVecLoc(pmc%realization%patch%aux%Material, &
-                                       subsurf_field%work_loc, &
-                                       POROSITY,ZERO_INTEGER)
 
         endif
     end select
@@ -993,7 +1006,8 @@ subroutine PMCSubsurfaceSetAuxDataForGeomech(this)
   PetscScalar, pointer :: temp_p(:)
   PetscScalar, pointer :: sub_por_loc_p(:)
   PetscScalar, pointer :: sim_por0_p(:)
-
+  PetscScalar, pointer :: sim_perm0_p(:) !DANNY - added this 11/7/16
+  
   PetscInt :: local_id
   PetscInt :: ghosted_id
   PetscInt :: pres_dof
@@ -1002,6 +1016,11 @@ subroutine PMCSubsurfaceSetAuxDataForGeomech(this)
   class(material_auxvar_type), pointer :: material_auxvars(:)
 
   PetscErrorCode :: ierr
+
+#ifdef GEOMECH_DEBUG
+  print *, 'PMCSubsurfaceSetAuxDataForGeomech()'
+#endif
+
 
   select case(this%option%iflowmode)
     case (TH_MODE)
@@ -1059,11 +1078,19 @@ subroutine PMCSubsurfaceSetAuxDataForGeomech(this)
           material_auxvars => pmc%realization%patch%aux%Material%auxvars
           call VecGetArrayF90(pmc%sim_aux%subsurf_por0, sim_por0_p,  &
                               ierr);CHKERRQ(ierr)
+          call VecGetArrayF90(pmc%sim_aux%subsurf_perm0, sim_perm0_p,  &
+                              ierr);CHKERRQ(ierr)
+
+          ghosted_id = subsurf_grid%nL2G(1)
+          
           do local_id = 1, subsurf_grid%nlmax
             ghosted_id = subsurf_grid%nL2G(local_id)
-            sim_por0_p(local_id) = material_auxvars(ghosted_id)%porosity
+            sim_por0_p(local_id) = material_auxvars(ghosted_id)%porosity ! Set here.  
+            sim_perm0_p(local_id) = material_auxvars(ghosted_id)%permeability(perm_xx_index) ! assuming isotropic perm
           enddo
           call VecRestoreArrayF90(pmc%sim_aux%subsurf_por0, sim_por0_p,  &
+                                  ierr);CHKERRQ(ierr)
+          call VecRestoreArrayF90(pmc%sim_aux%subsurf_perm0, sim_perm0_p,  &
                                   ierr);CHKERRQ(ierr)
         endif
     end select
