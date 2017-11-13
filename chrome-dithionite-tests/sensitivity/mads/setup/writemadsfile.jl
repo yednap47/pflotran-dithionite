@@ -8,6 +8,7 @@ import DataFrames
 # general info
 basedir = "/lclscratch/sach/Programs/pflotran-dithionite/chrome-dithionite-tests"
 simbasename = "1d-allReactions-10m-uniformVelocity"
+templatename = "1d-allReactions-10m-uniformVelocity"
 targetsbasename = "syntheticdata-nn-skip10"
 
 # Default parameters for writing MADS file
@@ -56,27 +57,27 @@ write(outfile, "- ina: {exp: \"2*10^log_is2o4\"}\n")
 # Finish writing mads file
 println(outfile,"Solution: $(soltype)")
 println(outfile,"Templates:")
-println(outfile,"- tmp1: {tpl: $(simbasename).in.tpl, write: $(simbasename).in}")
+println(outfile,"- tmp1: {tpl: $(templatename).in.tpl, write: $(templatename).in}")
 println(outfile,"Restart: $(startover)")
 close(outfile)
 println("finished writing mads file")
 
-# Open the template file and put the new times in
-targettimesf = open(joinpath(basedir,"sensitivity","mads","setup","syntheticdata","$(targetsbasename)-times.txt"), "r")
-targettimes = readlines(targettimesf)
-close(targettimesf)
-
-outfile2 = open(joinpath(".","$(simbasename).in.tpl"))
-tempstrings = readlines(outfile2)
-close(outfile2)
-
-timeindex = find(map(x->contains(x,"  TIMES d"),tempstrings))
-for ti in timeindex
-    tempstrings[ti] = targettimes[1]
-end
-
-outfile3 = open(joinpath(".","$(simbasename).in.tpl"), "w")
-for tempstring in tempstrings
-    print(outfile3,tempstring)
-end
-close(outfile3)
+# # Open the template file and put the new times in
+# targettimesf = open(joinpath(basedir,"sensitivity","mads","setup","syntheticdata","$(targetsbasename)-times.txt"), "r")
+# targettimes = readlines(targettimesf)
+# close(targettimesf)
+# 
+# outfile2 = open(joinpath(".","$(simbasename).in.tpl"))
+# tempstrings = readlines(outfile2)
+# close(outfile2)
+# 
+# timeindex = find(map(x->contains(x,"  TIMES d"),tempstrings))
+# for ti in timeindex
+#     tempstrings[ti] = targettimes[1]
+# end
+# 
+# outfile3 = open(joinpath(".","$(simbasename).in.tpl"), "w")
+# for tempstring in tempstrings
+#     print(outfile3,tempstring)
+# end
+# close(outfile3)

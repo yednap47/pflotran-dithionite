@@ -88,4 +88,3 @@ src/pflotran/unittests/*
 *.png
 *.h5
 *.dbg
-*.txt
