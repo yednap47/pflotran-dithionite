@@ -1,4 +1,4 @@
-import sachFun
+import Pflotran
 using PyCall
 @pyimport numpy.random as nr
 import PyPlot
@@ -10,7 +10,7 @@ function writemadstargets(basedir::String, myvar::Array{String,1}, timeUnits::St
     if h5
         # put code for reading h5 file here
     else
-        results = sachFun.readObsDataset(obsdatafname,myvar)
+        results = Pflotran.readObsDataset(obsdatafname,myvar)
     end
     
     outfile = open(joinpath(".","syntheticdata","$(targetsfname)-nn-skip$(skipfactor)-targets.txt"), "w")
@@ -73,7 +73,7 @@ targetsfname = "syntheticdata"
 # User info for making synthetic data
 myvar = ["east CrO4-- [mol/d]"]
 mystd = 2.e-6 # standard deviation
-skipfactor = 0 # resolution of targets vs simulation output
+skipfactor = 10 # resolution of targets vs simulation output
 caltag = "Cr6_Obs"
 timeUnits = "d"
 

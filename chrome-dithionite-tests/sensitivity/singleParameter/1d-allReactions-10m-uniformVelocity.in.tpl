@@ -70,7 +70,7 @@ CHEMISTRY
     /
     FE2_CR6
       RATE_CONSTANT_SLOW !k_fe2_cr6_slow! # /s
-      RATE_CONSTANT_FAST !k_fe2_cr6_fast!  # /s
+      RATE_CONSTANT_FAST !k_fe2_cr6_fast! # /s
       ROCK_DENSITY 1200.d0 # kg/m^3_bulk
       EPS 1.d-30
     /
@@ -106,7 +106,7 @@ END
 #=========================== solver options ===================================
 NEWTON_SOLVER TRANSPORT
   ITOL_UPDATE 1.d-5
-  ITOL 1.d-12
+  ITOL 1.d-11
   RTOL 1.d-8
   STOL 1.d-30
 END
@@ -185,7 +185,7 @@ OUTPUT
   PERIODIC TIME 1.d0 d
   PRINT_COLUMN_IDS
   MASS_BALANCE_FILE
-    PERIODIC TIME  1.d0 d
+    PERIODIC TIME 1.d0 d
   /
 END
 
@@ -264,7 +264,7 @@ CONSTRAINT initial
     Na+ 1.0000e-20 T
   /
   MINERALS
-    Fe(OH)3(s) !ifeoh3!  1.d3
+    Fe(OH)3(s) !ifeoh3! 1.d3
     Cr(OH)3(s) 1.d-20 1.d3
     Calcite 2.2099e-02 1.d3
   /

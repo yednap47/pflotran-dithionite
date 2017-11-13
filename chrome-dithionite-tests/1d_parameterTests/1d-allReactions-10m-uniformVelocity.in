@@ -69,7 +69,7 @@ CHEMISTRY
     /
     FE2_CR6
       RATE_CONSTANT_SLOW 1.00e-01 # /s
-      RATE_CONSTANT_FAST 1.00e+01  # /s
+      RATE_CONSTANT_FAST 1.00e+01 # /s
       ROCK_DENSITY 1200.d0 # kg/m^3_bulk
       EPS 1.d-30
     /
