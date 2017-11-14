@@ -1,4 +1,4 @@
-using sachFun
+using Pflotran
 using HDF5
 using PyPlot
 
@@ -35,7 +35,7 @@ majorFormatter = matplotlib[:ticker][:FormatStrFormatter]("%0.2e")
 for i in 1:length(myvar)
   subplot(2,4,i)
   for j in 1:length(mytime)
-    results = sachFun.readh5_1D("$(filename).h5",[myvar[i]],coord_name,mytime[j])
+    results = Pflotran.readh5_1D("$(filename).h5",[myvar[i]],coord_name,mytime[j])
     plot(results[:,1],(results[:,2]),label=mylabel[j],c=mycmap(j))
     ax = gca()
     ax[:tick_params](labelsize=mysize)
@@ -64,4 +64,4 @@ myvar = [
 # "Total_S2O4-- [M]",
 ]
 
-results = sachFun.readh5_1D("$(filename).h5",myvar,coord_name,37.0)
+results = Pflotran.readh5_1D("$(filename).h5",myvar,coord_name,37.0)
