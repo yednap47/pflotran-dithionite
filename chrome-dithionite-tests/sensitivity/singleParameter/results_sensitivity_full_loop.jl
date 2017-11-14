@@ -3,7 +3,7 @@
 # Description: Use information about Cr(III) from h5 file and bound Fe(II) in
 #    mass balance file to create spider plot metrics
 #------------------------------------------------------------------------------
-import sachFun
+import Pflotran
 import Mads
 import PyPlot
 plt = PyPlot
@@ -12,7 +12,7 @@ import JLD
 
 function getTotalCr3_fromh5(istop,filename,myvar)
     # calculate moles using m^3/m^3_bulk, dxyz and molar volume
-    results = sachFun.readh5_1D(filename,myvar,coord_name,mytime)
+    results = Pflotran.readh5_1D(filename,myvar,coord_name,mytime)
     volumes = dx*dy*dz
     moles = results[:,2].*volumes/MV
     total_moles = sum(moles)
@@ -54,7 +54,6 @@ logsensparams = [
                 "log_ifeoh3",
                 "log_q",
                 ]
-
 
 nstops = 3 # number of sensitivity runs
 mytime = 365
@@ -128,7 +127,7 @@ for sensparam in sensparams
     for istop in 1:nstops*2+1
         if completed[istop] == "yes"
             filename = joinpath(basedir,rundir,sensparam,"run$istop","$(simbasename)-mas.dat")
-            obsresults = sachFun.readObsDataset(filename,myvar,dataframe=true)
+            obsresults = Pflotran.readObsDataset(filename,myvar,dataframe=true)
             total_sboundfe2 = obsresults[Symbol("Global fast_Fe++")] + obsresults[Symbol("Global slow_Fe++")]
             sensresults_fe2 = append!(sensresults_fe2,[maximum(total_sboundfe2)])
             sensresults_cr6 = append!(sensresults_cr6,-(obsresults[Symbol("east CrO4-- [mol]")][mytime]))
@@ -213,7 +212,7 @@ ax[2][:set_position]([box[:x0]-0.05, box[:y0]+0.09, box[:width] * 0.8, box[:heig
 
 ax[2][:legend](loc=0,fontsize=mysize-2,loc=2, bbox_to_anchor=(1.1, 1.03), frameon = false)
 f[:canvas][:draw]() # Update the figure
-plt.savefig("results_full_$(rundir)_$(mytime)$(timeunits).png",dpi=100)
+plt.savefig("results_full_$(rundir)_$(mytime)$(timeunits).png",dpi=600)
 plt.close()
 
 savedata = Dict()

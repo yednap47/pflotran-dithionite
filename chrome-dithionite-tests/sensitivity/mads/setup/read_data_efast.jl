@@ -1,5 +1,5 @@
 using HDF5
-import sachFun
+import Pflotran
 
 function readdata_efast(d)
     
@@ -51,7 +51,7 @@ function readdata_efast(d)
 
         # METHOD 2: USE THE MASS BALANCE FILE
         myvar = ["east CrO4-- [mol/d]"]
-        mydata = sachFun.readObsDataset(masstag,myvar)
+        mydata = Pflotran.readObsDataset(masstag,myvar)
         obstimes = mydata[:,1]
         targets = -mydata[:,2]
         for i in 1:length(obstimes)

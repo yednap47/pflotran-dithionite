@@ -70,7 +70,7 @@ CHEMISTRY
     /
     FE2_CR6
       RATE_CONSTANT_SLOW !k_fe2_cr6_slow! # /s
-      RATE_CONSTANT_FAST !k_fe2_cr6_fast!  # /s
+      RATE_CONSTANT_FAST !k_fe2_cr6_fast! # /s
       ROCK_DENSITY 1200.d0 # kg/m^3_bulk
       EPS 1.d-30
     /
@@ -264,7 +264,7 @@ CONSTRAINT initial
     Na+ 1.0000e-20 T
   /
   MINERALS
-    Fe(OH)3(s) !ifeoh3!  1.d3
+    Fe(OH)3(s) !ifeoh3! 1.d3
     Cr(OH)3(s) 1.d-20 1.d3
     Calcite 2.2099e-02 1.d3
   /
