@@ -54,8 +54,8 @@ Parameters:
 - log_factor_k_fe2_cr6_slow: {init: -2.0000, min: -3.0000, max: -1.0000, type: opt}
 - log_is2o4: {init: -1.0000, min: -2.0000, max: 0.0000, type: opt}
 - is2o4: {exp: "10^log_is2o4"}
-- log_ifeoh3_vf: {init: -2.4136, min: -3.4136, max: -1.4136, type: opt}
-- ifeoh3_vf: {exp: "10^log_ifeoh3_vf"}
+- log_ifeoh3: {init: -2.4136, min: -3.4136, max: -1.4136, type: opt}
+- ifeoh3: {exp: "10^log_ifeoh3"}
 - log_q: {init: -0.8239, min: -1.8239, max: 0.1761, type: opt}
 - q: {exp: "10^log_q"}
 - k_fe2_o2_slow: {exp: "10^log_k_fe2_o2_fast*10^log_factor_k_fe2_o2_slow"}

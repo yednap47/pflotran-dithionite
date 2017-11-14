@@ -32,7 +32,7 @@ targetsf = open(joinpath(basedir,"sensitivity","mads","setup","syntheticdata","$
 targets = readlines(targetsf)
 close(targetsf)
 for target in targets
-     write(outfile, target)
+     println(outfile, target)
 end
 
 println(outfile,"Parameters:")
