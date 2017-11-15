@@ -1,8 +1,9 @@
-using Pflotran
-using HDF5
-using PyPlot
+import Pflotran
+import PyPlot
+plt = PyPlot
+using LaTeXStrings
 
-fig = figure("pyplot",figsize=(15,7))
+fig = plt.figure("pyplot",figsize=(15,7))
 filename = ARGS[1]
 # filename = "1d-allReactions-10m"
 # filename = "1d-allReactions-10m-fullspecies"
@@ -20,24 +21,20 @@ myvar = [
 ]
 
 coord_name = "X"
-# mytime = [1,2,3,4,5]
-# mytime = [0.1,0.2,0.3,0.4,0.5,0.6,0.7,0.8,0.9]
-mytime = [37.0,73.0,110.0,146.0,183.0,219.0,256.0,292.0,329.0]
-# mytime = [0.01,0.02,0.03,0.04,0.05,0.06,0.07,0.08]
+mytime = [100.0,200.0,300.0]
 timeunits = "days"
 mysize = 11
 
 mylabel = ["$(time) $(timeunits)" for time in mytime]
-mycmap = get_cmap("Paired",length(mytime)+1)
+mycmap = plt.get_cmap("Paired",length(mytime)+1)
 
-
-majorFormatter = matplotlib[:ticker][:FormatStrFormatter]("%0.2e")
+majorFormatter = plt.matplotlib[:ticker][:FormatStrFormatter]("%0.2e")
 for i in 1:length(myvar)
-  subplot(2,4,i)
+  plt.subplot(2,4,i)
   for j in 1:length(mytime)
     results = Pflotran.readh5_1D("$(filename).h5",[myvar[i]],coord_name,mytime[j])
-    plot(results[:,1],(results[:,2]),label=mylabel[j],c=mycmap(j))
-    ax = gca()
+    plt.plot(results[:,1],(results[:,2]),label=mylabel[j],c=mycmap(j))
+    ax = plt.gca()
     ax[:tick_params](labelsize=mysize)
     ax[:set_xlabel](L"\mathrm{Distance\; from\; inlet\;[m]}",size=mysize+2)
     ax[:yaxis][:set_major_formatter](majorFormatter)
@@ -48,20 +45,21 @@ for i in 1:length(myvar)
   end
 end
 
-legend(loc=0,frameon=false,fontsize=mysize)
-tight_layout(h_pad=.1)
-savefig("$(filename).png",dpi=600)
-# close()
+plt.legend(loc=0,frameon=false,fontsize=mysize)
+plt.tight_layout(h_pad=.1)
+plt.savefig("$(filename).png",dpi=600)
+plt.close()
 
-myvar = [
-# "pH",
-# "Total_O2(aq) [M]",
-# "Total_CrO4-- [M]",
-"Fe(OH)3(s)_VF",
-# "Cr(OH)3(s)_VF",
-"slow_Fe++ [mol_m^3]",
-"fast_Fe++ [mol_m^3]",
-# "Total_S2O4-- [M]",
-]
+plt.figure()
+# Plot curve used for mads sensitivity analysis
+myvar = ["east CrO4-- [mol/d]"]
+redo = Pflotran.readObsDataset("$(filename)-mas.dat",myvar;dataframe=false)
+plt.plot(redo[:,1],-redo[:,2],"b-",label = myvar[1])
 
-results = Pflotran.readh5_1D("$(filename).h5",myvar,coord_name,37.0)
+plt.xlim(0,365)
+plt.legend()
+plt.xlabel("Time [d]")
+plt.ylabel(myvar[1])
+plt.tight_layout()
+plt.savefig("$(filename)-mas.png",dpi=600)
+plt.close()

@@ -1,7 +1,7 @@
-import(Mads)
-using PyPlot
+import Mads
+import PyPlot
 plt = PyPlot
-import(JLD)
+import JLD
 
 Mads.quietoff()
 
@@ -30,8 +30,8 @@ Mads.plotobsSAresults(md, efastresult,
                       xtitle = "x", ytitle = "y")
 
 toc()
-# elapsed time: 220263.713274993 seconds
-JLD.save("efastresult.jld","dictionary",efastresult)
+# elapsed time: 45973.989803665 seconds
+JLD.save("efast_tightened.jld","dictionary",efastresult)
 
 # ================ PLOT RESULTS WITH PYPLOT ================================== #
 coolnames  = JLD.load("../setup/coolnames.jld","dictionary")
@@ -59,7 +59,7 @@ for obskey in obskeys
     i += 1
 end
 
-majorFormatter = matplotlib[:ticker][:FormatStrFormatter]("%0.1e")
+majorFormatter = plt.matplotlib[:ticker][:FormatStrFormatter]("%0.1e")
 mycmap = plt.get_cmap("Paired",15)
 linewidth = 1.5
 f, ax = plt.subplots(4, 1, sharex=true, figsize=(8,10))
