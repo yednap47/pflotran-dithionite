@@ -83,7 +83,7 @@ regression_tests/*
 tpls/*
 src/pflotran/unittests/*
 *.chk
-*.dat
+#*.dat
 *.svg
 *.png
 *.h5

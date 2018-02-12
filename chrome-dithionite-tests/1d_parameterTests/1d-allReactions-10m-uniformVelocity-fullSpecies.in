@@ -1,0 +1,415 @@
+# Id: pflotran-reaction-simple.in, Wed 02 Nov 2016 09:41:54 AM MDT pandeys #
+# Created by Sachin Pandey, LANL
+# Description: Test simple reactions on 2D grid
+#------------------------------------------------------------------------------
+
+SIMULATION
+  SIMULATION_TYPE SUBSURFACE
+  PROCESS_MODELS
+    SUBSURFACE_TRANSPORT transport
+      GLOBAL_IMPLICIT
+      NUMERICAL_JACOBIAN
+    /
+  /
+#  RESTART 1d-allReactions-10m-checkpoint-restart.chk 0.
+END
+
+SUBSURFACE
+
+#=========================== useful tranport parameters ==================
+UNIFORM_VELOCITY 1.50e-01 0.d0 0.d0 m/d
+
+#=========================== chemistry ========================================
+CHEMISTRY
+  PRIMARY_SPECIES
+    H+
+    O2(aq)
+    CrO4--
+    S2O4--
+    S2O3--
+    SO3--
+    SO4--
+    Fe++
+    Fe+++
+    Cr+++
+    HCO3-
+    Ca++
+    K+
+    Na+
+    Cl-
+    Mg++
+    SiO2(aq)
+#    Al+++
+  /
+  SECONDARY_SPECIES
+#    Al(OH)2+
+#    Al(SO4)2-
+#    Al(OH)4-
+#    Al(OH)3(aq)
+#    AlOH++
+#    AlSO4+
+    CO2(aq)
+    CO3--
+    CaCO3(aq)
+    CaCl+
+    CaCl2(aq)
+    CaHCO3+
+    CaOH+
+    CaSO4(aq)
+    Cr(OH)2+
+    Cr2O7--
+    CrOH++
+    Fe(OH)2(aq)
+    Fe(OH)2+
+    Fe(OH)3(aq)
+    Fe(OH)3-
+    Fe(OH)4-
+    Fe(OH)4--
+    Fe(SO4)2-
+    Fe2(OH)2++++
+    Fe3(OH)4(5+)
+    FeCO3(aq)
+    FeCO3+
+    FeCl+
+    FeCl++
+    FeCl2(aq)
+    FeCl2+
+    FeCl4--
+    FeHCO3+
+    FeOH+
+    FeOH++
+    FeSO4(aq)
+    FeSO4+
+    H2SO3(aq)
+    H2SO4(aq)
+    H2SiO4--
+    HCl(aq)
+    HCrO4-
+    HSO3-
+    HSO4-
+    HSiO3-
+    H3SiO4-
+    KCl(aq)
+    KHSO4(aq)
+    KOH(aq)
+    KSO4-
+    Mg4(OH)4++++
+    MgCO3(aq)
+    MgCl+
+    MgHCO3+
+    MgSO4(aq)
+#    NaAlO2(aq)
+    NaCO3-
+    NaCl(aq)
+    NaHCO3(aq)
+    NaHSiO3(aq)
+    NaOH(aq)
+    NaSO4-
+    OH-
+    Cr(OH)3(aq)
+    Cr(OH)4-
+    MgOH+
+  /
+  IMMOBILE_SPECIES
+    slow_Fe++
+    fast_Fe++
+  /
+  MINERALS
+    Fe(OH)3(s)
+    Cr(OH)3(s)
+#    Halite
+    Calcite
+    Siderite
+    Dolomite
+    Anhydrite
+#    K-Feldspar
+  /
+  MINERAL_KINETICS
+    Fe(OH)3(s)
+      RATE_CONSTANT 1.d-3 mol/m^2-sec
+    /
+    Cr(OH)3(s)
+      RATE_CONSTANT 1.d-3 mol/m^2-sec
+    /
+    Calcite
+      RATE_CONSTANT 1.d-3 mol/m^2-sec
+    /
+#    Halite
+#      RATE_CONSTANT 1.d-3 mol/m^2-sec
+#    /
+    Siderite
+      RATE_CONSTANT 1.d-3 mol/m^2-sec
+    /
+    Dolomite
+      RATE_CONSTANT 1.d-3 mol/m^2-sec
+    /
+    Anhydrite
+      RATE_CONSTANT 1.d-3 mol/m^2-sec
+    /
+#    K-Feldspar
+#      RATE_CONSTANT 1.d-3 mol/m^2-sec
+#    /
+  /
+  DATABASE /lclscratch/sach/Programs/pflotran-dithionite/chrome-dithionite-tests/chromium_dithionite_2017_v2.dat
+  ACTIVITY_COEFFICIENTS TIMESTEP
+  LOG_FORMULATION
+  OUTPUT
+    ALL
+    FREE_ION
+    TOTAL
+    SECONDARY_SPECIES
+    PH
+  /
+END
+
+#=========================== solver options ===================================
+NEWTON_SOLVER TRANSPORT
+  ITOL_UPDATE 1.d-5
+  ITOL 1.d-12
+  RTOL 1.d-8
+  STOL 1.d-30
+END
+
+#=========================== discretization ===================================
+GRID
+  TYPE structured
+  NXYZ 260 1 1
+  DXYZ
+    0.01 0.01 0.01 0.01 0.01 0.01 0.01 0.01 0.01 0.01 \ 
+    0.01 0.01 0.01 0.01 0.01 0.01 0.01 0.01 0.01 0.01 \ 
+    0.01 0.01 0.01 0.01 0.01 0.01 0.01 0.01 0.01 0.01 \ 
+    0.01 0.01 0.01 0.01 0.01 0.01 0.01 0.01 0.01 0.01 \ 
+    0.01 0.01 0.01 0.01 0.01 0.01 0.01 0.01 0.01 0.01 \ 
+    0.01 0.01 0.01 0.01 0.01 0.01 0.01 0.01 0.01 0.01 \ 
+    0.01 0.01 0.01 0.01 0.01 0.01 0.01 0.01 0.01 0.01 \ 
+    0.01 0.01 0.01 0.01 0.01 0.01 0.01 0.01 0.01 0.01 \ 
+    0.01 0.01 0.01 0.01 0.01 0.01 0.01 0.01 0.01 0.01 \ 
+    0.01 0.01 0.01 0.01 0.01 0.01 0.01 0.01 0.01 0.01 \ 
+    0.01 0.01 0.01 0.01 0.01 0.01 0.01 0.01 0.01 0.01 \ 
+    0.01 0.01 0.01 0.01 0.01 0.01 0.01 0.01 0.01 0.01 \ 
+    0.01 0.01 0.01 0.01 0.01 0.01 0.01 0.01 0.01 0.01 \ 
+    0.01 0.01 0.01 0.01 0.01 0.01 0.01 0.01 0.01 0.01 \ 
+    0.01 0.01 0.01 0.01 0.01 0.01 0.01 0.01 0.01 0.01 \ 
+    0.01 0.01 0.01 0.01 0.01 0.01 0.01 0.01 0.01 0.01 \ 
+    0.01 0.01 0.01 0.01 0.01 0.01 0.01 0.01 0.01 0.01 \ 
+    0.01 0.01 0.01 0.01 0.01 0.01 0.01 0.01 0.01 0.01 \ 
+    0.01 0.01 0.01 0.01 0.01 0.01 0.01 0.01 0.01 0.01 \ 
+    0.01 0.01 0.01 0.01 0.01 0.01 0.01 0.01 0.01 0.01 \ 
+    0.1 0.1 0.1 0.1 0.1 0.1 0.1 0.1 0.1 0.1 \ 
+    0.1 0.1 0.1 0.1 0.1 0.1 0.1 0.1 0.1 0.1 \ 
+    0.1 0.1 0.1 0.1 0.1 0.1 0.1 0.1 0.1 0.1 \ 
+    0.1 0.1 0.1 0.1 0.1 0.1 0.1 0.1 0.1 0.1 \ 
+    0.2 0.2 0.2 0.2 0.2 0.2 0.2 0.2 0.2 0.2 \ 
+    0.2 0.2 0.2 0.2 0.2 0.2 0.2 0.2 0.2 0.2 
+    0.1 
+    0.1 
+  /
+END
+
+#=========================== fluid properties =================================
+FLUID_PROPERTY
+  DIFFUSION_COEFFICIENT 1.00e-09
+END
+
+#=========================== material properties ==============================
+MATERIAL_PROPERTY soil1
+  ID 1
+  POROSITY 0.15d0
+  TORTUOSITY 1.d0
+  SATURATION_FUNCTION cc1
+  ROCK_DENSITY 1200.d0 # kg/m^3_bulk
+  PERMEABILITY
+     PERM_ISO 2.36944d-11
+  /
+#  LONGITUDINAL_DISPERSIVITY 5.d0
+END
+
+#=========================== characteristic curves ============================
+CHARACTERISTIC_CURVES cc1
+  SATURATION_FUNCTION VAN_GENUCHTEN
+    ALPHA  1.d-4
+    M 0.5d0
+    LIQUID_RESIDUAL_SATURATION 0.1d0
+  /
+  PERMEABILITY_FUNCTION MUALEM_VG_LIQ
+    M 0.5d0
+    LIQUID_RESIDUAL_SATURATION 0.1d0
+  /
+END
+
+#=========================== output options ===================================
+OUTPUT
+  FORMAT HDF5
+  VELOCITY_AT_CENTER
+  PERIODIC TIME 1.d0 d
+  PRINT_COLUMN_IDS
+  MASS_BALANCE_FILE
+    PERIODIC TIME  1.d0 d
+  /
+END
+
+#=========================== times ============================================
+TIME
+  FINAL_TIME 365.d0 d
+  INITIAL_TIMESTEP_SIZE 1.d-10 d
+  MAXIMUM_TIMESTEP_SIZE 1.d-1 d at 0.0 d
+  MAXIMUM_TIMESTEP_SIZE 1.d0 d at 15.0 d
+END
+
+#=========================== regions ==========================================
+REGION all
+  COORDINATES
+    0.d0 0.d0 0.d0
+    10.0 1.d-1 1.d-1
+  /
+END
+
+REGION west
+  FACE west
+  COORDINATES
+    0.d0 0.d0 0.d0
+    0.d0 1.d-1 1.d-1
+  /
+END
+
+REGION east
+  FACE east
+  COORDINATES
+    10.0 0.d0 0.d0
+    10.0 1.d-1 1.d-1
+  /
+END
+
+#=========================== flow conditions ==================================
+
+#=========================== transport conditions =============================
+TRANSPORT_CONDITION initial
+  TYPE dirichlet
+  CONSTRAINT_LIST
+    0.d0 initial
+  /
+END
+
+TRANSPORT_CONDITION inlet
+  TYPE dirichlet_zero_gradient
+  CONSTRAINT_LIST
+    0.0  d injectant
+    15.0 d inlet
+  /
+END
+
+TRANSPORT_CONDITION outlet
+  TYPE dirichlet_zero_gradient
+  CONSTRAINT_LIST
+    0.d0 inlet
+  /
+END
+
+#=========================== constraints ======================================^M
+CONSTRAINT initial
+  CONCENTRATIONS
+    H+ -8.9238e-05  T
+    O2(aq) 2.8400e-04  T
+    CrO4-- 1.9200e-05  T
+    S2O4-- 1.0000e-20  T
+    S2O3-- 1.0000e-20  T
+    SO3-- 1.0000e-20  T
+    SO4-- 2.4374e-02  T
+    Fe++ 2.3069e-04  T
+    Fe+++ 1.00e-20  T
+    Cr+++ 1.00e-20  T
+    HCO3- 4.1709e-05  T
+    Ca++ 2.2387e-02  T
+    K+ 1.4318e-05  T
+    Na+ 1.0000e-20  T
+    Cl- 1.0000e-20  T
+    Mg++ 1.7980e-03  T
+    SiO2(aq) 4.2954e-05  T
+#    Al+++ 1.4318e-05  T
+  /
+  MINERALS
+    Fe(OH)3(s) 3.86e-03 1.0e+03
+    Cr(OH)3(s) 1.00e-20 1.0e+03
+#    Halite 5.55e-03 1.0e+03
+    Calcite 4.43e-03 1.0e+03
+    Siderite 3.04e-03 1.0e+03
+    Dolomite 4.19e-03 1.0e+03
+    Anhydrite 4.05e-03 1.0e+03
+#    K-Feldspar 4.69e-03 1.0e+03
+  /
+  IMMOBILE
+    slow_Fe++ 1.00d-20
+    fast_Fe++ 1.00d-20
+  /
+END
+
+CONSTRAINT inlet
+  CONCENTRATIONS
+    H+ -8.9238e-05  T
+    O2(aq) 2.8400e-04  T
+    CrO4-- 1.9200e-05  T
+    S2O4-- 1.0000e-20  T
+    S2O3-- 1.0000e-20  T
+    SO3-- 1.0000e-20  T
+    SO4-- 2.4374e-02  T
+    Fe++ 2.3069e-04  T
+    Fe+++ 1.00e-20  T
+    Cr+++ 1.00e-20  T
+    HCO3- 4.1709e-05  T
+    Ca++ 2.2387e-02  T
+    K+ 1.4318e-05  T
+    Na+ 1.0000e-20  T
+    Cl- 1.0000e-20  T
+    Mg++ 1.7980e-03  T
+    SiO2(aq) 4.2954e-05  T
+#    Al+++ 1.4318e-05  T
+  /
+END
+
+CONSTRAINT injectant
+  CONCENTRATIONS
+    H+      -0.4 T
+    O2(aq)   2.84d-4 T
+    CrO4--   1.d-20 T
+    S2O4--   1.d-1 T
+    S2O3--   1.d-20 T
+    SO3--    1.d-20 T
+    SO4--    1.d-20 T
+    Fe++     1.d-20 T
+    Fe+++    1.d-20 T
+    Cr+++    1.d-20 T
+    HCO3-    0.4 T
+    Ca++     1.d-20 T
+    K+       0.8 T
+    Na+      2.d-1 T
+    Cl-      1.d-20 T
+    Mg++     1.d-20 T
+    SiO2(aq) 1.d-20 T
+    Al+++    1.d-20 T
+  /
+END
+
+#=========================== condition couplers ===============================
+# initial condition
+INITIAL_CONDITION
+  TRANSPORT_CONDITION initial
+  REGION all
+END
+
+BOUNDARY_CONDITION west
+  TRANSPORT_CONDITION inlet
+  REGION west 
+END
+
+BOUNDARY_CONDITION east  
+  TRANSPORT_CONDITION outlet
+  REGION east
+END
+
+#=========================== stratigraphy couplers ============================
+STRATA
+  REGION all 
+  MATERIAL soil1
+END
+
+END_SUBSURFACE
